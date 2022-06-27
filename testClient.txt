@@ -1,0 +1,30 @@
+Say no
+{color:darkgray}07:02:22.735 {color}{color:darkyellow}-----------------------------------------------------------------------{color}
+             {color:darkyellow}Please navigate to the visualisation of the emulated device on the DUT's UI. Is there any possibility to see the status{color}
+             {color:darkyellow}or control the device using the Basic Command Class?{color}
+             {color:darkyellow}»YES-NO:SHOW«{color}
+{color:darkgray}07:03:27.704 {color}{color:darkyellow}Yes{color}
+
+Just continue
+{color:darkgray}06:38:08.989 {color}{color:green}OK Interview of CC Association V2 sucessfully passed.{color}
+{color:darkgray}06:38:09.022 {color}{color:darkyellow}-----------------------------------------------------------------------{color}
+             {color:darkyellow}Inclusion and interview passed, click OK to continue with testing minimum user requirements.{color}
+             {color:darkyellow}»OK:SHOW«{color}
+{color:darkgray}06:38:23.989 {color}{color:darkyellow}Ok{color}
+
+Add Node
+{color:darkgray}06:37:02.224 {color}{color:darkyellow}In order to trigger the interview by the DUT, please include the emulated node into the DUT with the following steps.{color}
+{color:darkgray}06:37:02.254 {color}{color:darkgreen}Done TypeLibrary:{color}                                                                                            {color:darkgray} Basic COM5{color}
+{color:darkgray}06:37:02.272 {color}
+{color:darkgray}06:37:02.272 {color}{color:darkyellow}-----------------------------------------------------------------------{color}
+             {color:darkyellow}Activate the Add mode in the UI of the DUT and click 'OK' to start Inclusion by the DUT!{color}
+             {color:darkyellow}»OK:SHOW«{color}
+{color:darkgray}06:37:27.239 {color}{color:darkyellow}Ok{color}
+
+Remove Node
+{color:darkgray}06:42:12.538 {color}
+{color:darkgray}06:42:12.538 {color}{color:darkyellow}-----------------------------------------------------------------------{color}
+             {color:darkyellow}Activate the Remove mode in the UI of the DUT and click 'OK' to start Exclusion by the DUT!{color}
+             {color:darkyellow}»OK:SHOW«{color}
+{color:darkgray}06:42:31.926 {color}{color:darkyellow}Ok{color}
+
