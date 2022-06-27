@@ -1,9 +1,9 @@
 /*** ZWayCTTAutoTest Z-Way HA module *******************************************
 
- Version: 1.0
+ Version: 1.1
  (c) Z-Wave.Me, 2022
  -----------------------------------------------------------------------------
- Author: Yurkin Vitaliy <aivs@z-wave.me>
+ Author: Yurkin Vitaliy <aivs@z-wave.me>, Poltorak Serguei <ps@z-wave.me>
  Implements ZWayCTTAutoTest support
  ******************************************************************************/
 
@@ -14,6 +14,9 @@
 function ZWayCTTAutoTest (id, controller) {
 	// Call superconstructor first (AutomationModule)
 	ZWayCTTAutoTest.super_.call(this, id, controller);
+
+	this.bufferLen = 0;
+	this.buffer;
 }
 
 inherits(ZWayCTTAutoTest, AutomationModule);
@@ -26,62 +29,45 @@ _module = ZWayCTTAutoTest;
 
 ZWayCTTAutoTest.prototype.init = function (config) {
 	ZWayCTTAutoTest.super_.prototype.init.call(this, config);
-
+	
 	var self = this;
-
-	var webSocket = new sockets.websocket(9090);
-	var webSocketClient = null;
-
-	webSocket.onconnect = function () {
-		debugPrint("ZWayCTTAutoTest: Client connected, sending ping and devices data");
-		webSocketClient = this;
-		webSocketClient.send(JSON.stringify(self.controller.devices));
+	
+	this.setup();
+	
+	this.webSocket = new sockets.websocket(9090);
+	this.webSocketClients = [];
+	
+	this.webSocket.onconnect = function () {
+		self.debug("Client connected, sending ping and devices data");
+		self.webSocketClients.push(this);;
 	}
-
-	webSocket.onmessage = function(event) {
-		debugPrint("ZWayCTTAutoTest DATA:", event.data);
-		var data = JSON.parse(event.data);
-
-		if (data.button && data.button === "YES") {
-			var response = {
-				button: "OK"
-			}
-    		webSocketClient.send(JSON.stringify(response));
-		}
-
-/*
-		var response = self.handleMessage({
-			method: "GET",
-			headers: {
-				Authorization: "Bearer " + data.token
-			},
-			peer: {
-				address: "0.0.0.0"
-			},
-			url: data.url
-		});
-		*/
+	
+	this.webSocket.onmessage = function(event) {
+		var data = decodeURIComponent(escape(event.data));
+		
+		self.debug("Received message: " + data);
+		self.receive(data);
 	};
-
-	webSocket.onclose = function() { 
-		if (this === webSocket) {
-			debugPrint("ZWayCTTAutoTest: Server websocket closed"); 
+	
+	this.webSocket.onclose = function() { 
+		if (this === self.webSocket) {
+			self.debug("Server websocket closed"); 
 		} else {
-			debugPrint("ZWayCTTAutoTest: Client disconnected");
+			self.debug("Client disconnected");
 		}
 	}
-
-	webSocket.onerror = function(event) { 
-		debugPrint("ZWayCTTAutoTest ERROR: ", event.data);
+	
+	this.webSocket.onerror = function(event) { 
+		self.debug("ERROR: ", event.data);
 	}
-
-	this.webSocket = webSocket;
 };
 
 ZWayCTTAutoTest.prototype.stop = function () {
+	this.webSocketClients.forEach(function(cli) {
+		cli.close();
+	});
 	this.webSocket && this.webSocket.close();
-	this.webSocket = null;
-
+	
 	ZWayCTTAutoTest.super_.prototype.stop.call(this);
 };
 
@@ -89,45 +75,74 @@ ZWayCTTAutoTest.prototype.stop = function () {
 // --- Module methods
 // ----------------------------------------------------------------------------
 
-ZWayCTTAutoTest.prototype.handleMessage = function (req) {
-	console.logJS(req);
-	var q = req.url.substring(1).replace(/\//g, '.');
-	if (!q) return null;
-	
-	var found = null;
-	if (ws.externalNames.some(function(ext) {
-		found = ext;
-		return (ext.name.length < q.length && q.slice(0, ext.name.length + 1) === ext.name + ".") || (ext.name === q);
-	}) && found) {
-		var auth = controller.auth.resolve(req, found.role);
-		if (!auth) {
+ZWayCTTAutoTest.prototype.debug = function(msg) {
+	console.log(this.getName() + ": " + msg);
+};
 
-			return {
-				status: 401,
-				body: "Not logged in"
-			};
+ZWayCTTAutoTest.prototype.setup = function () {
+	var self = this;
 
-		} else if (controller.auth.isAuthorized(auth.role, found.role)) {
+	executeFile(this.meta.location + "/" + "helpers.js");
+	executeFile(this.meta.location + "/" + "handlers.js");
 
-			// fill user field
-			req.user = auth.user;
-			req.role = auth.role;
-			req.authToken = auth.token;
-			
-			var cache = ws.evalCache || (ws.evalCache = {});
-			var handler = cache[found.name] || (cache[found.name] = evalPath(found.name));
-			console.logJS(found.name);
-			console.logJS(typeof handler);
-			return handler(req.url.substring(found.name.length + 1), req);
+	this.qa = ZWayCTTAutoTestQA(ZWayCTTAutoTestHelpers);
 
-		} else {
-
-			return {
-				status: 403,
-				body: 'Permission denied'
-			};
-			
-		}
+	function escapeRegExp(string) {
+		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 	}
-	return null;
-}
+	
+	// find buffer length based on the longest question
+	this.qa.forEach(function(test) {
+		if (self.bufferLen < test.question.length) {
+			self.bufferLen = test.question.length;
+		}
+		
+		test.question.map(function(line) {
+			return new RegExp(".*" + escapeRegExp(line).replace("####", "(.*)") + ".*");
+		});
+	});
+	 
+	this.buffer = Array(this.bufferLen);
+};
+
+ZWayCTTAutoTest.prototype.receive = function (line) {
+	var self = this;
+	
+	// roll the buffer
+	for (var i = this.bufferLen - 1; i > 0; i--) {
+		this.buffer[i] = this.buffer[i - 1];
+	}
+	this.buffer[0] = line;
+	
+	// match questions
+	this.qa.forEach(function(test) {
+		for (var i = 0; i < test.question.length; i++) {
+			if (!self.buffer[i].match(test.question[test.question.length - 1 - i])) return;
+		}
+		
+		// matched
+		
+		var ret;
+		if (test.action) {
+			ret = test.action();
+		}
+		
+		var answer = test.answer(ret);
+		
+		self.sendButton(answer);
+	});
+
+
+};
+
+ZWayCTTAutoTest.prototype.sendButton = function (button) {
+	var response = {
+		button: button
+	}
+	var msg = JSON.stringify(response);
+	
+	this.debug("Sending message: " + button);
+	this.webSocketClients.forEach(function(cli) {
+		cli.send(msg);
+	});
+};
