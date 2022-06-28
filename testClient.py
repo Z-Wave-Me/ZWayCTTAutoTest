@@ -17,7 +17,7 @@ def thread_function(lines):
     print("Start sending")
     for line in lines:
         time.sleep(0.01)
-        message = line.encode("utf-8")
+        message = ('{"log": "' + line.strip().replace('"', '\"') + '"}').encode("utf-8");
         print("Sending", message)
         wsapp.send(message)
     

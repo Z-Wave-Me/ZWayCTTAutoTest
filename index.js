@@ -43,9 +43,9 @@ ZWayCTTAutoTest.prototype.init = function (config) {
 	}
 	
 	this.webSocket.onmessage = function(event) {
-		var data = decodeURIComponent(escape(event.data));
+		self.debug("Received message: " + event.data);
 		
-		self.debug("Received message: " + data);
+		var data = JSON.parse(decodeURIComponent(escape(event.data)));
 		self.receive(data);
 	};
 	
@@ -111,34 +111,36 @@ ZWayCTTAutoTest.prototype.setup = function () {
 	this.buffer = Array(this.bufferLen);
 };
 
-ZWayCTTAutoTest.prototype.receive = function (line) {
+ZWayCTTAutoTest.prototype.receive = function (message) {
 	var self = this;
 	
-	// roll the buffer
-	for (var i = this.bufferLen - 1; i > 0; i--) {
-		this.buffer[i] = this.buffer[i - 1];
+	if (message.log) {
+		line = message.log;
+		
+		// roll the buffer
+		for (var i = this.bufferLen - 1; i > 0; i--) {
+			this.buffer[i] = this.buffer[i - 1];
+		}
+		this.buffer[0] = line;
+		
+		// match questions
+		this.qa.forEach(function(test) {
+			for (var i = 0; i < test.question.length; i++) {
+				if (!self.buffer[i].match(test.question[test.question.length - 1 - i])) return;
+			}
+			
+			// matched
+			
+			var ret;
+			if (test.action) {
+				ret = test.action();
+			}
+			
+			var answer = test.answer(ret);
+			
+			self.sendButton(answer);
+		});
 	}
-	this.buffer[0] = line;
-	
-	// match questions
-	this.qa.forEach(function(test) {
-		for (var i = 0; i < test.question.length; i++) {
-			if (!self.buffer[i].match(test.question[test.question.length - 1 - i])) return;
-		}
-		
-		// matched
-		
-		var ret;
-		if (test.action) {
-			ret = test.action();
-		}
-		
-		var answer = test.answer(ret);
-		
-		self.sendButton(answer);
-	});
-
-
 };
 
 ZWayCTTAutoTest.prototype.sendButton = function (button) {
