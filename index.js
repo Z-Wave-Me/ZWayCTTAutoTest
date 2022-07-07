@@ -91,12 +91,6 @@ ZWayCTTAutoTest.prototype.setup = function () {
 		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 	}
 	
-	// until the but in CTT is fixed, remove all :SHOW lines
-	this.qa.map(function(test) {
-		test.question = test.question.slice(0,-1);
-		return test;
-	});
-	
 	// find buffer length based on the longest question
 	this.qa.forEach(function(test) {
 		if (self.bufferLen < test.question.length) {
