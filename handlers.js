@@ -531,6 +531,20 @@ function ZWayCTTAutoTestQA(helpers) {
 				question: ["Will the product be available in USA?", "»YES-NO:SHOW«"],
 				answer: yes
 			},
+			{
+				question: ["»URL-DEFINE:https://certification.z-wavealliance.org/wiki/index.php/Control_Definitions_-_Firmware_Update_Meta_Data_Command_Class«", "»URL-OPEN-CANCEL:SHOW«"],
+				answer: open
+			},
+			{
+				// temp for tests
+				question: ["Did the DUT pass the test?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				// temp for tests
+				question: ["»OK:SHOW«"],
+				answer: ok
+			}
 		];
 	}
 }
