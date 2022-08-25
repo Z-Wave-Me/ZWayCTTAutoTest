@@ -1,5 +1,5 @@
 {
-	"singleton": false,
+	"singleton": true,
 	"dependencies": [],
 	"category": "support_external_dev",
 	"author": "Z-Wave.Me",

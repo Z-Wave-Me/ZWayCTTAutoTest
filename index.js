@@ -39,13 +39,11 @@ ZWayCTTAutoTest.prototype.init = function (config) {
 	
 	this.webSocket.onconnect = function () {
 		self.debug("Client connected, sending ping and devices data");
-		self.webSocketClients.push(this);;
+		self.webSocketClients.push(this);
 	}
 	
 	this.webSocket.onmessage = function(event) {
-		self.debug("Received message: " + event.data);
-		
-		var data = JSON.parse(decodeURIComponent(escape(event.data)));
+		var data = JSON.parse(decodeURIComponent(escape(event.data)).replace(/\t/g, "\\t"));
 		self.receive(data);
 	};
 	
@@ -97,8 +95,8 @@ ZWayCTTAutoTest.prototype.setup = function () {
 			self.bufferLen = test.question.length;
 		}
 		
-		test.question.map(function(line) {
-			return new RegExp(".*" + escapeRegExp(line).replace("####", "(.*)") + ".*");
+		test.question = test.question.map(function(line) {
+			return new RegExp(".*" + escapeRegExp(line).replace(/####/g, "(.*)") + ".*");
 		});
 	});
 	 
@@ -109,30 +107,54 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 	var self = this;
 	
 	if (message.log) {
-		line = message.log;
-		
-		// roll the buffer
-		for (var i = this.bufferLen - 1; i > 0; i--) {
-			this.buffer[i] = this.buffer[i - 1];
-		}
-		this.buffer[0] = line;
-		
-		// match questions
-		this.qa.forEach(function(test) {
-			for (var i = 0; i < test.question.length; i++) {
-				if (!self.buffer[i].match(test.question[test.question.length - 1 - i])) return;
+		var lines = message.log.split("\n");
+		lines.forEach(function(line) {
+			if (line.length === 0) return;
+			
+			line = line.replace(/{color(:[^}]+)?}/g, ''); // remove {color:xxx} and {color}
+			
+			self.debug("Received message: " + line);
+			
+			// roll the buffer
+			for (var i = self.bufferLen - 1; i > 0; i--) {
+				self.buffer[i] = self.buffer[i - 1];
 			}
+			self.buffer[0] = line;
 			
-			// matched
-			
-			var ret;
-			if (test.action) {
-				ret = test.action();
-			}
-			
-			var answer = test.answer(ret);
-			
-			self.sendButton(answer);
+			// match questions
+			self.qa.forEach(function(test) {
+				var params = [];
+				for (var i = 0; i < test.question.length; i++) {
+					var m = self.buffer[i].match(test.question[test.question.length - 1 - i]);
+					//console.log(!!m, test.question[test.question.length - 1 - i].toString());
+					if (!m) return;
+					
+					var _params = [];
+					for (var k = 1; k < m.length; k++) {
+						_params.push(m[k]);
+					}
+					params = _params.concat(params); // we are stepping from end to start
+				}
+				
+				params.unshift("zeroth param"); // params are numbered from 1
+				
+				console.logJS("Matched with params", params);
+				
+				ZWayCTTAutoTestHelpers.setParams(params);
+				
+				// matched
+				
+				var ret;
+				if (test.action) {
+					ret = test.action();
+				}
+				
+				var answer = test.answer(ret);
+				
+				if (answer) {
+					self.sendButton(answer);
+				}
+			});
 		});
 	}
 };
