@@ -78,8 +78,9 @@ ZWayCTTAutoTestHelpers.yesNo = function(ret) {
 	return ret ? 'Yes' : 'No';
 }
 
-ZWayCTTAutoTestHelpers.alert = function() {
-	console.log("Test failed!");
+ZWayCTTAutoTestHelpers.alert = function(msg) {
+	console.log("Test failed!" + (msg ? " " + msg : ""));
+	return no();
 }
 
 ZWayCTTAutoTestHelpers.setParams = function(params) {
@@ -126,72 +127,91 @@ ZWayCTTAutoTestHelpers.controller = function() {
 	return zway.controller.data;
 }
 
+ZWayCTTAutoTestHelpers.exec = function(f) {
+	return f();
+}
+
 ZWayCTTAutoTestHelpers.checkDecParam = function(obj, path, paramNum) {
-	return function(param) {
+	return function() {
 		return ZWayCTTAutoTestHelpers.dev(obj).value(path) == ZWayCTTAutoTestHelpers.decParam(paramNum);
 	};
 }
 
 ZWayCTTAutoTestHelpers.checkFloatParam = function(obj, path, paramNum) {
-	return function(param) {
+	return function() {
 		return ZWayCTTAutoTestHelpers.dev(obj).value(path) == ZWayCTTAutoTestHelpers.decParam(paramNum);
 	};
 }
 
 ZWayCTTAutoTestHelpers.checkByteParam = function(obj, path, paramNum) {
-	return function(param) {
+	return function() {
 		return ZWayCTTAutoTestHelpers.dev(obj).value(path) == ZWayCTTAutoTestHelpers.byteParam(paramNum);
 	};
 }
 
 ZWayCTTAutoTestHelpers.checkWordParam = function(obj, path, paramNumH, paramNumL) {
-	return function(param) {
+	return function() {
 		return ZWayCTTAutoTestHelpers.dev(obj).value(path) == ZWayCTTAutoTestHelpers.wordParam(paramNumH, paramNumL);
 	};
 }
 
 ZWayCTTAutoTestHelpers.checkMappedParam = function(obj, path, func, paramNum) {
-	return function(param) {
+	return function() {
 		return func(ZWayCTTAutoTestHelpers.dev(obj).value(path)) == ZWayCTTAutoTestHelpers.getParam(paramNum);
 	};
 }
 
-ZWayCTTAutoTestHelpers.checkScale = function(cc, scale, value) {
-	var data = ZWayCTTAutoTestHelpers.lastDevice()[cc].data;
-	
-	for (var i in data) {
-		if (!Number.isInteger(Number(i))) continue;
+ZWayCTTAutoTestHelpers.checkScale = function(cc, selector, scale_param, value_param) {
+	return function() {
+		var DELTA = 0.00001; // to handle float approximation errors
 		
-		if (data[i].scaleString.value === scale) {
-			return data[i].val.value === value;
+		var data = ZWayCTTAutoTestHelpers.lastDevice()[cc].data;
+		
+		var scale = typeof scale_param === 'number' ? ZWayCTTAutoTestHelpers.getParam(scale_param) : scale_param;
+		var value = ZWayCTTAutoTestHelpers.floatParam(value_param);
+		
+		for (var i in data) {
+			if (!Number.isInteger(Number(i))) continue;
+			
+			if (data[i][selector].value === scale) {
+				return (data[i].val.value - value) < DELTA;
+			}
+			else if ((scale === '°C' && data[i][selector].value === '°F') || (scale === '°F' && data[i][selector].value === '°C') || scale === 'unknown scale') {
+				console.logJS("!!!!!!", data[i].intVal.value, Math.pow(10, data[i].precision.value), data[i].intVal.value / (Math.pow(10, data[i].precision.value)), value);
+				return (data[i].intVal.value / (Math.pow(10, data[i].precision.value)) - value) < DELTA;
+			}
 		}
-	}
-	
-	return false;
+		
+		return false;
+	};
 };
 
 ZWayCTTAutoTestHelpers.checkAllScalesZero = function(cc) {
-	var data = ZWayCTTAutoTestHelpers.lastDevice()[cc].data;
-	
-	for (var i in data) {
-		if (!Number.isInteger(Number(i))) continue;
+	return function() {
+		var data = ZWayCTTAutoTestHelpers.lastDevice()[cc].data;
 		
-		if (data[i].val.value !== 0) return false;
-	}
-	
-	return true;
+		for (var i in data) {
+			if (!Number.isInteger(Number(i))) continue;
+			
+			if (data[i].val.value !== 0) return false;
+		}
+		
+		return true;
+	};
 };
+
+ZWayCTTAutoTestHelpers.isDevicePresent = function(i) {
+	return function() {
+		return !(ZWayCTTAutoTestHelpers.getParam(i) in zway.devices);
+	};
+}
 
 ZWayCTTAutoTestHelpers.prepareS2 = function() {
 	zway.controller.data.S2AutoInclude.keys = -1; // all keys
 	zway.controller.data.S2AutoInclude.pin = 0; // use known pin
 }
 
-ZWayCTTAutoTestHelpers.isDevicePresent = function(params) {
-	return !(params[0] in zway.devices);
-}
-
-ZWayCTTAutoTestHelpers.wait = function(checkFunc, timeout) {
+ZWayCTTAutoTestHelpers.wait = function(timeout, checkFunc) {
 	var d = Date.now() + timeout * 1000;
 	
 	while (Date.now() < d) {
@@ -204,18 +224,42 @@ ZWayCTTAutoTestHelpers.wait = function(checkFunc, timeout) {
 	return false;
 }
 
+ZWayCTTAutoTestHelpers.waitAndExecute = function(timeout, func) {
+	return function() {
+		ZWayCTTAutoTestHelpers.wait(timeout);
+		return func();
+	};
+}
+
 ZWayCTTAutoTestHelpers.waitInterviewDone = function() {
 	var T = 120;
 	
-	return ZWayCTTAutoTestHelpers.wait(function() {
+	return ZWayCTTAutoTestHelpers.wait(T, function() {
 		return ZWayCTTAutoTestHelpers.dev("dev").value("data.interviewDone");
-	}, T);
+	});
 }
 
 ZWayCTTAutoTestHelpers.waitManagementIdle = function() {
 	var T = 120;
 
-	return ZWayCTTAutoTestHelpers.wait(function() {
+	return ZWayCTTAutoTestHelpers.wait(T, function() {
 		return zway.controller.data.controllerState.value == 0;
-	}, T);
+	});
+}
+
+// CCs helpers
+
+ZWayCTTAutoTestHelpers.ccCentralSceneKeyAttribute = function(str) {
+	switch(str) {
+		case "Key Pressed 1 time":  return 0;
+		case "released":            return 1;
+		case "held down":           return 2;
+		case "Key Presses 2 times": return 3;
+		case "Key Presses 3 times": return 4;
+		case "Key Presses 4 times": return 5;
+		case "Key Presses 5 times": return 6;
+		default:
+			ZWayCTTAutoTestHelpers.alert();
+			return null;
+	}
 }

@@ -84,6 +84,7 @@ ZWayCTTAutoTest.prototype.setup = function () {
 	executeFile(this.meta.location + "/" + "handlers.js");
 
 	this.qa = ZWayCTTAutoTestQA(ZWayCTTAutoTestHelpers);
+	this.iq = ZWayCTTAutoTestIgnoreQ();
 
 	function escapeRegExp(string) {
 		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -99,6 +100,10 @@ ZWayCTTAutoTest.prototype.setup = function () {
 			return new RegExp(".*" + escapeRegExp(line).replace(/####/g, "(.*)") + ".*");
 		});
 	});
+	
+	this.iq = this.iq.map(function(q) {
+		return new RegExp(".*" + escapeRegExp(q).replace(/####/g, "(.*)") + ".*");
+	});
 	 
 	this.buffer = Array(this.bufferLen);
 };
@@ -109,11 +114,19 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 	if (message.log) {
 		var lines = message.log.split("\n");
 		lines.forEach(function(line) {
-			if (line.length === 0) return;
-			
 			line = line.replace(/{color(:[^}]+)?}/g, ''); // remove {color:xxx} and {color}
 			
 			self.debug("Received message: " + line);
+			
+			// check ignore list
+			self.iq.forEach(function(q) {
+				if (line.match(q)) {
+					line = "";
+					self.debug("Ignored message");
+				}
+			});
+			
+			if (line.length === 0) return;
 			
 			// roll the buffer
 			for (var i = self.bufferLen - 1; i > 0; i--) {
@@ -122,12 +135,12 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 			self.buffer[0] = line;
 			
 			// match questions
-			self.qa.forEach(function(test) {
+			self.qa.some(function(test) { // some is used to match only the first questions
 				var params = [];
 				for (var i = 0; i < test.question.length; i++) {
 					var m = self.buffer[i].match(test.question[test.question.length - 1 - i]);
 					//console.log(!!m, test.question[test.question.length - 1 - i].toString());
-					if (!m) return;
+					if (!m) return false;
 					
 					var _params = [];
 					for (var k = 1; k < m.length; k++) {
@@ -154,6 +167,8 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 				if (answer) {
 					self.sendButton(answer);
 				}
+				
+				return true;
 			});
 		});
 	}
