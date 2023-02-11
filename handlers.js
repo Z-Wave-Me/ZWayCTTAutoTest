@@ -10,6 +10,10 @@ function ZWayCTTAutoTestQA(helpers) {
 			// Generic questions about the device
 			// Fill it according to your DUT!
 			{
+				question: ["Does the DUT implement an UI which allows the end user to establish association between nodes?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
 				question: ["Does the DUT empower the consumer or end user to lock or unlock the Anti-Theft feature of a controlled node?", "»YES-NO:SHOW«"],
 				answer: no
 			},
@@ -63,6 +67,14 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["Will the product be available in USA?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is the DUT capable to display the last known state of the emulated end node?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is the DUT able to display the last known state of the emulated end node?", "»YES-NO:SHOW«"],
 				answer: yes
 			},
 			
@@ -235,16 +247,96 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: ok
 			},
 			{
+				question: ["Please wait that the Inclusion has finished, make sure that the DUT has completed the Association and AGI interview and", "proceed by clicking 'OK'.", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
+				question: ["Please wait that the Inclusion has finished and proceed by clicking 'OK'.", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
+				question: ["Please wait for the interview to be finished before clicking 'OK'!", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' as soon as the Inclusion process has finished on the DUT side!", "»OK:SHOW«"],
+				action: waitInterviewDone, // or we are secondary?
+				answer: ok
+			},
+			{
+				question: ["Wait until the DUT is ready!", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
+				question: ["Wait until the Inclusion process has finished or abort it on DUT side!", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' as soon as the Inclusion process has finished on the DUT side!", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
 				question: ["Please reset the DUT and confirm or start Exclusion of the DUT!", "Removing node..."],
-				answer: startLearnMode
+				action: startLearnMode
 			},
 			{
 				question: ["Wait for activating Learn Mode on DUT..."],
-				answer: startLearnMode
+				action: startLearnMode
+			},
+			{
+				question: ["Click 'OK' to start inclusion of the DUT!", "»OK:SHOW«"],
+				action: startLearnMode,
+				answer: ok
+			},
+			{
+				question: ["Set DUT in learn mode and click 'OK' to continue", "»OK:SHOW«"],
+				action: startLearnMode,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' to start Exclusion of the DUT!", "»OK:SHOW«"],
+				action: startLearnMode,
+				answer: ok
 			},
 			{
 				question: ["Please reset the DUT, start Add Mode and confirm these steps..."],
-				answer: resetAndStartInclusion
+				action: resetAndStartInclusion
+			},
+			{
+				question: ["Please reset the DUT."],
+				action: reset
+			},
+			{
+				question: ["Reset the DUT!", "»OK:SHOW«"],
+				action: reset
+			},
+			{
+				question: ["Do you want to exclude the DUT? If 'No' is clicked, reset the DUT before the following steps!"],
+				action: reset,
+				answer: no
+			},
+			{
+				question: ["Please click 'OK' and trigger a capability discovery for node #### using the DUT's UI!", "»OK:SHOW«"],
+				action: forceInterview,
+				answer: ok
+			},
+			{
+				question: ["Include the CTT End Device into the DUT network ...", "»OK:SHOW«"],
+				answer: ok
+			},
+			{
+				question: ["Include the #### Device #### of #### into the DUT network ...", "»OK:SHOW«"],
+				answer: ok
+			},
+			{
+				question: ["Inclusion and interview passed, click 'OK' to continue with testing additional control requirements.", "»OK:SHOW«"],
+				answer: ok
 			},
 			
 			// List of controlled CCs
@@ -293,29 +385,29 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_BarrierOperatorCC_Rev01
 			{
 				question: ["BARRIER_OPERATOR_SET with target value='0x####' (initiate ####)"],
-				answer: function() { lastDevice().BarrierOperator.Set(byteParam(1)) }
+				action: function() { lastDevice().BarrierOperator.Set(byteParam(1)) }
 			},
 			{
 				question: ["BARRIER_OPERATOR_SIGNAL_SET with target value='0x####' (####) for Subsytem 'AudibleNotification'"],
-				answer: function() { lastDevice().BarrierOperator.SignalSet(1, byteParam(1)) }
+				action: function() { lastDevice().BarrierOperator.SignalSet(1, byteParam(1)) }
 			},
 			{
 				question: ["BARRIER_OPERATOR_SIGNAL_SET with target value='0x####' (####) for Subsytem 'VisualNotification'"],
-				answer: function() { lastDevice().BarrierOperator.SignalSet(2, byteParam(1)) }
+				action: function() { lastDevice().BarrierOperator.SignalSet(2, byteParam(1)) }
 			},
 			
 			// CCR_DoorLockCC_Rev01
 			{
 				question: ["Set Door Lock Operation Mode UnsecuredWithTimeout"],
-				answer: function() { lastDevice().DoorLock.Set(1) }
+				action: function() { lastDevice().DoorLock.Set(1) }
 			},
 			{
 				question: ["Set Door Lock Operation Mode Unsecured"],
-				answer: function() { lastDevice().DoorLock.Set(0) }
+				action: function() { lastDevice().DoorLock.Set(0) }
 			},
 			{
 				question: ["Set Door Lock Operation Mode Secured"],
-				answer: function() { lastDevice().DoorLock.Set(255) }
+				action: function() { lastDevice().DoorLock.Set(255) }
 			},
 			{
 				question: [
@@ -336,7 +428,7 @@ function ZWayCTTAutoTestQA(helpers) {
 					"Twist Assist:      '####'",
 					"*******************************************************************" // to distinguish V1 from newer
 				],
-				answer: function() { lastDevice().DoorLock.ConfigurationSet(
+				action: function() { lastDevice().DoorLock.ConfigurationSet(
 								getParam(1) == "TimedOperation" ? 2 : 1, // mode
 								(getParam(6) == 'enabled' ? 1 : 0) + (getParam(7) == 'enabled' ? 1 : 0) * 2 + (getParam(8) == 'enabled' ? 1 : 0) * 4 + (getParam(9) == 'enabled' ? 1 : 0) * 8, // outer handle
 								(getParam(2) == 'enabled' ? 1 : 0) + (getParam(3) == 'enabled' ? 1 : 0) * 2 + (getParam(4) == 'enabled' ? 1 : 0) * 4 + (getParam(5) == 'enabled' ? 1 : 0) * 8, // inner handle
@@ -363,7 +455,7 @@ function ZWayCTTAutoTestQA(helpers) {
 					"Lock Timeout:      #### seconds", 
 					"*******************************************************************" // to distinguish V1 from newer
 				],
-				answer: function() { lastDevice().DoorLock.ConfigurationSet(
+				action: function() { lastDevice().DoorLock.ConfigurationSet(
 								getParam(1) == "TimedOperation" ? 2 : 1, // mode
 								(getParam(6) == 'enabled' ? 1 : 0) + (getParam(7) == 'enabled' ? 1 : 0) * 2 + (getParam(8) == 'enabled' ? 1 : 0) * 4 + (getParam(9) == 'enabled' ? 1 : 0) * 8, // outer handle
 								(getParam(2) == 'enabled' ? 1 : 0) + (getParam(3) == 'enabled' ? 1 : 0) * 2 + (getParam(4) == 'enabled' ? 1 : 0) * 4 + (getParam(5) == 'enabled' ? 1 : 0) * 8, // inner handle
@@ -407,7 +499,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["Timeout for Test sequence is 5 min, waiting for following events:", "METER_RESET"],
-				answer: function() { lastDevice().Meter.Reset() }
+				action: function() { lastDevice().Meter.Reset() }
 			},
 			{
 				question: ["Wait a moment and confirm if all meter scales has been reset on DUTs UI!", "»YES-NO:SHOW«"],
@@ -418,6 +510,10 @@ function ZWayCTTAutoTestQA(helpers) {
 				question: ["Confirm that '####' scale is set to #### in the DUTs UI!", "»YES-NO:SHOW«"],
 				action: checkScale("Meter", "scaleString", 1, 2),
 				answer: yesNo
+			},
+			{
+				question: ["Please make sure that the current state of the emulated Meter device (scale = '####') is visible on the DUT's UI and", "confirm to start the test sequence!", "»OK:SHOW«"],
+				answer: ok
 			},
 			{
 				question: [
@@ -433,11 +529,15 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_MultilevelSwitchCC_Rev01
 			{
 				question: ["* SWITCH_MULTILEVEL_SET to value = '####%' (0x####) with duration 'factory default (0x####)'."],
-				answer: function() { lastDevice().SwitchMultilevel.Set(byteParam(2)) }
+				action: function() { lastDevice().SwitchMultilevel.Set(byteParam(2)) }
 			},
 			{
-				question: ["* SWITCH_MULTILEVEL_START_LEVEL_CHANGE  with increasing brightness", "* SWITCH_COLOR_STOP_LEVEL_CHANGE" ],
-				answer: function() { lastDevice().SwitchMultilevel.StartLevelChange(false, 20, false, 0); wait(1); lastDevice().SwitchMultilevel.StopLevelChange() }
+				question: ["* SWITCH_MULTILEVEL_SET to Z-Wave value = '####' (0x####), i.e. hardware level = '####%', with duration 'factory default", "(0x####)'"],
+				action: function() { lastDevice().SwitchMultilevel.Set(byteParam(2)) }
+			},
+			{
+				question: ["* SWITCH_MULTILEVEL_START_LEVEL_CHANGE  with increasing brightness", "* SWITCH_MULTILEVEL_STOP_LEVEL_CHANGE" ],
+				action: function() { lastDevice().SwitchMultilevel.StartLevelChange(false, 20, false, 5); wait(1); lastDevice().SwitchMultilevel.StopLevelChange() }
 				// TODO the question will be improved in future to host duration and start level
 			},
 			{
@@ -445,15 +545,33 @@ function ZWayCTTAutoTestQA(helpers) {
 				action: checkDecParam("dev", "SwitchMultilevel.data.level", 1),
 				answer: yes
 			},
+			{
+				question: ["Please confirm that last known state of Multilevel Switch is Z-Wave value = '####' (0x####), i.e. hardware level = '####%'!", "»YES-NO:SHOW«"],
+				action: checkByteParam("dev", "SwitchMultilevel.data.level", 2),
+				answer: yes
+			},
+			{
+				question: ["Is the DUT able to send a Start/Stop Level Change to the emulated end node?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is the current level set to ####% in DUT's UI?", "»YES-NO:SHOW«"],
+				action: checkDecParam("dev", "SwitchMultilevel.data.level", 1),
+				answer: yes
+			},
+			{
+				question: ["Please make sure that the current state of the emulated Multilevel Switch device is visible on the DUT's UI and confirm", "to start the test sequence!", "»OK:SHOW«"],
+				answer: ok
+			},
 
 			// CCR_BinarySwitchCC_Rev01
 			{
 				question: ["* SWITCH_BINARY_SET with value='0x####' (####)"],
-                                answer: function() { lastDevice().SwitchBinary.Set(byteParam(1)) }
+                                action: function() { lastDevice().SwitchBinary.Set(byteParam(1)) }
 			},
 			{
 				question: ["Please confirm if that last known state of Binary Switch is '####' (0x####)!", "»YES-NO:SHOW«"],
-				action: checkByteParam("dev", "SwitchBinary.data.level", 2),
+				action: checkMappedParam("dev", "SwitchBinary.data.level", function(v) { return v ? 'FF' : '00' }, 2),
 				answer: yesNo
 			},
 			{
@@ -473,7 +591,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_BasicCC_Rev01
 			{
 				question: ["* BASIC_SET with value='0x####'", "* BASIC_GET subsequently to BASIC_SET [optional]"],
-                                answer: function() { lastDevice().Basic.Set(byteParam(1)); lastDevice().Basic.Get() }
+                                action: function() { lastDevice().Basic.Set(byteParam(1)); lastDevice().Basic.Get() }
 			},
 			{
 				question: ["Please confirm if that last known state of Basic is '####' (0x####)!", "»YES-NO:SHOW«"],
@@ -489,7 +607,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_ConfigurationCC_Rev01
 			{
 				question: ["OK Interview of CC Configuration V3 sucessfully passed"],
-				answer: function() { lastDevice().Configuration.data.preferBulk = false }
+				action: function() { lastDevice().Configuration.data.preferBulk = false }
 				// TODO Remove this question once Cert house fixes this
 			},
 			{
@@ -497,14 +615,24 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: waitInterviewDone // make sure to fetch all params info before proceeding
 			},
 			{
-				question: ["Please set the parameter 'Param ####' with number #### to value #### using the DUT's UI!", " ", "******", "Timeout for Test sequence is 5 min, waiting for following events:", "* CONFIGURATION_SET"],
-				answer: function() {
+				question: ["Please set the parameter 'Param ####' with number #### to value #### using the DUT's UI!", "******", "Timeout for Test sequence is 5 min, waiting for following events:", "* CONFIGURATION_SET"],
+				action: function() {
 					if (lastDevice().Configuration.data.version.value < 3) {
 						lastDevice().Configuration.Set(decParam(2), decParam(3), 1);
 						// TODO Change it once Cert house adds the size in the description. For now 1.
 					} else {
+						lastDevice().Configuration.data.preferBulk = false;
+						// TODO Remove this question once Cert house fixes this ^^^
 						lastDevice().Configuration.Set(decParam(2), decParam(3));
 					}
+				}
+			},
+			{
+				question: ["Please set the parameter 'Param ####' with number #### to value #### using the DUT's UI!", "******", "Timeout for Test sequence is 5 min, waiting for following events:", "* CONFIGURATION_BULK_SET"],
+				action: function() {
+					lastDevice().Configuration.data.preferBulk = true;
+					// TODO Remove this question once Cert house fixes this ^^^
+					lastDevice().Configuration.Set(decParam(2), decParam(3));
 				}
 			},
 			{
@@ -513,7 +641,6 @@ function ZWayCTTAutoTestQA(helpers) {
 					try {
 						lastDevice().Configuration.Set(decParam(2), decParam(3));
 					} catch(e) {
-						alert(e.toString());
 						return false;
 					}
 					return true;
@@ -526,17 +653,20 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["* CONFIGURATION_SET with reset to default for parameter number ####"],
-				answer: function() { lastDevice().Configuration.SetDefault(decParam(1)) }
+				action: function() {
+					lastDevice().Configuration.data.preferBulk = false;
+					// TODO Remove this question once Cert house fixes this ^^^
+					lastDevice().Configuration.SetDefault(decParam(1));
+				}
 			},
 			{
 				question: [" * CONFIGURATION_DEFAULT_RESET"],
-				answer: function() { lastDevice().Configuration.DefaultReset() }
+				action: function() { lastDevice().Configuration.DefaultReset() }
 			},
 			{
 				question: [
 					"Verify that the DUT offers a UI which allows the end user to see the parameter numbers which has been set (parameter",
 					"number = ####) and their current value according to Requirement Number: CL:0070.03.41.01.1",
-					"----",
 					"Please consult the UI of the DUT - does the DUT meet the requirement described above?",
 					"»YES-NO:SHOW«"
 				],
@@ -556,7 +686,6 @@ function ZWayCTTAutoTestQA(helpers) {
 				question: [
 					"Verify that the DUT offers a UI which allows the end user to see supported parameter numbers, their current value,",
 					"their allowed value range and their default value according to Requirement Number: CL:0070.03.41.01.1",
-					"----",
 					"Please consult the UI of the DUT - does the DUT meet the requirement for parameter numbers ####?", // list as "1, 2, 3", to be converted using eval
 					"»YES-NO:SHOW«"
 				],
@@ -610,7 +739,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_AssociationCC_Rev01
 			{
 				question: ["* ASSOCIATION_SET to add CTT controller (node ID ####) to the association group #### of the emulated Binary Switch", "device(node ID ####)"],
-				answer: function() { zway.devices[decParam(3)].Association.Set(decParam(2), decParam(1)) }
+				action: function() { zway.devices[decParam(3)].Association.Set(decParam(2), decParam(1)) }
 			},
 			
 			
@@ -627,7 +756,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			
 			// CCR_DiscardLowerSecurityCmds_Rev01
 			{
-				question: ["Sending a Basic Report #### to the DUT", "-----", "Confirm if the Current State has been set to #### referring to the DUT's UI", "»YES-NO:SHOW«"],
+				question: ["Sending a Basic Report #### to the DUT", "Confirm if the Current State has been set to #### referring to the DUT's UI", "»YES-NO:SHOW«"],
 				action: checkDecParam("dev", "Basic.data.level", 2),
 				answer: yesNo
 			},
@@ -653,23 +782,25 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_ColorSwitchCC_Rev01
 			{
 				question: ["* SWITCH_COLOR_SET for color component '####' (ID = 0x####) with value='####."],
-				answer: function() { lastDevice().SwitchColor.Set(byteParam(2), decParam(3)) }
+				action: function() { lastDevice().SwitchColor.Set(byteParam(2), decParam(3)) }
 			},
 			{
 				question: ["* SWITCH_COLOR_START_LEVEL_CHANGE for color component '####' (ID = 0x####) increasing its brightness.", "* SWITCH_COLOR_STOP_LEVEL_CHANGE for color component '####' (ID = 0x####)"],
-				answer: function() { lastDevice().SwitchColor.StartStateChange(byteParam(2), false); wait(1); lastDevice().SwitchColor.StopStateChange(byteParam(4)) }
+				action: function() { lastDevice().SwitchColor.StartStateChange(byteParam(2), false); wait(1); lastDevice().SwitchColor.StopStateChange(byteParam(4)) }
 				// TODO the question will be improved in future to host duration and start level
 			},
+			/* Not needed in Rev02?
 			{
 				question: ["* SWITCH_BINARY_SET"],
 				// Must be after SwitchBinary to match a more specific rule first
-                                answer: function() { lastDevice().SwitchBinary.Set(0) }
+                                action: function() { lastDevice().SwitchBinary.Set(0) }
 			},
 			{
 				question: ["* SWITCH_MULTILEVEL_SET"],
 				// Must be after SwitchMultilevel to match a more specific rule first
-                                answer: function() { lastDevice().SwitchMultilevel.Set(0) }
+                                action: function() { lastDevice().SwitchMultilevel.Set(0) }
 			},
+			*/
 			{
 				question: ["Is the current level of color component '####' (ID = ####) set to #### in the DUT's UI according to Requirement Number", "CL:0033.01.42.01.1?", "»YES-NO:SHOW«"],
 				action: function() {
@@ -677,98 +808,194 @@ function ZWayCTTAutoTestQA(helpers) {
 				},
 				answer: yes
 			},
+			{
+				question: ["Please make sure that the current state of the emulated Color Switch device is visible on the DUT's UI and confirm to", "start the test sequence!", "»YES-NO:SHOW«"],
+				answer: yes
+			},
 			
 			// CCR_ImplementedCCVersions_Rev01
 			{
 				question: ["* SWITCH_BINARY_SET with any value"],
-                                answer: function() { lastDevice().SwitchBinary.Set(0) }
+                                action: function() { lastDevice().SwitchBinary.Set(0) }
 			},
 			
 			// CCR_IndicatorCC_Rev01
-			
 			{
 				question: ["* INDICATOR_SET to identify node"],
-				answer: function() { lastDevice().Indicator.Identify() }
+				action: function() { lastDevice().Indicator.Identify() }
+			},
+			
+			// CDR_ZWPv2IndicatorCCRequirements_Rev01
+			{
+				question: ["The Identify indicator function of the DUT will now be triggered. Click 'OK' to continue and observe the DUT!", "»OK:SHOW«"],
+				answer: ok
+			},
+			{
+				question: ["Did the Identify indicator on the DUT blink five times?", "»YES-NO:SHOW«"],
+				action: function() {
+					return
+						dev("ctrldev").value("Indicator.data[80][3].state") == 10 &&
+						dev("ctrldev").value("Indicator.data[80][4].state") == 5 &&
+						dev("ctrldev").value("Indicator.data[80][5].state") == 5;
+				}
 			},
 			
 			// CCR_MultiChannelCC_Rev01
 			
+			// CCR_UsercodeCC_Rev02
+			{
+				question: ["* Set User Code ID #### to '####' with code '####'!"],
+                                action: function() {
+                                	var mode;
+                                	switch(getParam(2)) {
+                                		case "Disabled":
+                                			mode = 0;
+                                			break;
+                                		case "Occupied":
+                                		case "Enabled / Grant Access":
+                                			mode = 1;
+                                			break;
+						case "Reserved":
+							mode = 2;
+							break;
+						case "MessagingMode":
+							mode = 3;
+							break;
+						case "PassageMode":
+							mode = 4;
+							break;
+						default:
+							alert()
+							return;
+                                	}
+                                	lastDevice().UserCode.Set(decParam(1), getParam(3), mode);
+				}
+			},
+			{
+				question: ["* Erase User Code ID ####"],
+                                action: function() { lastDevice().UserCode.Set(decParam(1), '', 0) }
+			},
+			{
+				question: ["* Set Keypad mode to Vacation."],
+                                action: function() {
+                                	var mode;
+                                	switch(getParam(1)) {
+                                		case "Normal":
+                                			mode = 0;
+                                			break;
+                                		case "Vacation":
+                                			mode = 1;
+                                			break;
+						case "Privacy":
+							mode = 2;
+							break;
+						case "Locked out":
+							mode = 3;
+							break;
+						default:
+							alert()
+							return;
+                                	}
+                                	lastDevice().UserCode.KeypadModeSet(mode);
+				}
+			},
+			{
+				question: ["* Set Master Code to '####'"],
+                                action: function() { lastDevice().UserCode.MasterCodeSet(getParam(1)) }
+			},
+			{
+				question: ["* Disable Master Code."],
+                                action: function() { lastDevice().UserCode.MasterCodeSet("") }
+			},
+			
 			// CCR_NotificationCC_Rev01
+			{
+				question: ["* NOTIFICATION_GET (ALARM_GET) for Notification Type 0x####"],
+                                action: function() { lastDevice().Alarm.Get(byteParam(1)) }
+			},
 			
 			// CCR_SimpleAVCC_Rev01
+			{
+				question: ["* SIMPLE_AV_CONTROL_SET with AV command '####' (0x####)"],
+                                action: function() { lastDevice().SimpleAV.Set(byteParam(2)) }
+			},
 			
 			// CCR_SoundSwitchCC_Rev01
 			{
 				question: ["* Set default tone to 'Tone####'."],
-				answer: function() { lastDevice().SoundSwitch.ConfigurationSet(decParam(1), 255) }
+				action: function() { lastDevice().SoundSwitch.ConfigurationSet(decParam(1), 255) }
 			},
 			{
 				question: ["* Please set volume to ####!"],
-				answer: function() { lastDevice().SoundSwitch.ConfigurationSet(0, decParam(1)) }
+				action: function() { lastDevice().SoundSwitch.ConfigurationSet(0, decParam(1)) }
 			},
 			{
 				question: ["* Please mute Volume (set to 0)!"],
-				answer: function() { lastDevice().SoundSwitch.ConfigurationSet(0, 0) }
+				action: function() { lastDevice().SoundSwitch.ConfigurationSet(0, 0) }
 			},
 			{
 				question: ["* Please play tone 'Tone####'!"],
-				answer: function() { lastDevice().SoundSwitch.TonePlaySet(decParam(1), 0) }
+				action: function() { lastDevice().SoundSwitch.TonePlaySet(decParam(1), 0) }
 			},
 			{
 				question: ["* Please play default tone!"],
-				answer: function() { lastDevice().SoundSwitch.TonePlaySet(255, 0) }
+				action: function() { lastDevice().SoundSwitch.TonePlaySet(255, 0) }
 			},
 			{
 				question: ["* Please stop all tones being currently played!"],
-				answer: function() { lastDevice().SoundSwitch.TonePlaySet(0, 0) }
+				action: function() { lastDevice().SoundSwitch.TonePlaySet(0, 0) }
 			},
 			
-			// Fimrware upgrade
-			/*
+			// CDR_ZWavePlusCC_Rev01
 			{
-				question: ["Does Firmware 0 Sub-Version = #### (####) match the actual device?", "»YES-NO:SHOW«"],
-				action: function answer: function(yes
-			},
-			*/
-			/*
-			{
-				//estion: ["Does Firmware 0 Version = 0x07 (7) match the actual device?", "»YES-NO:SHOW«"],
-				question: ["Does Firmware #### Version = #### (####) match the actual device?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			*/
-			/*
-			{
-				question: ["Does Firmware #### Sub-Version = #### (####) match the actual device?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			*/
-			
-			// Z-Wave Plus
-			/*
-			{
-				question: ["Does Installer Icon Type = 05 00 match the actual device?", "»YES-NO:SHOW«"],
-				action: checkWordParam("ctrl", ".....", 1, 2)
+				question: ["Does User Icon Type = #### #### match the actual device?", "»YES-NO:SHOW«"],
+				action: checkWordParam("ctrldev", "data.userIcon", 1, 2),
 				answer: yesNo
 			},
-			*/
+			{
+				question: ["Does Installer Icon Type = #### #### match the actual device?", "»YES-NO:SHOW«"],
+				action: checkWordParam("ctrldev", "data.installerIcon", 1, 2),
+				answer: yesNo
+			},
 			{
 				question: ["Does Manufacturer ID = #### #### match the actual device?", "»YES-NO:SHOW«"],
-				action: checkWordParam("ctrl", "manufacturerId", 1, 2),
+				action: checkWordParam("ctrldev", "data.manufacturerId", 1, 2),
 				answer: yesNo
 			},
 			{
 				question: ["Does Product ID = #### #### match the actual device?", "»YES-NO:SHOW«"],
-				action: checkWordParam("ctrl", "manufacturerProductId", 1, 2),
+				action: checkWordParam("ctrldev", "data.manufacturerProductId", 1, 2),
 				answer: yesNo
 			},
 			{
 				question: ["Does Product Type ID = #### #### match the actual device?", "»YES-NO:SHOW«"],
-				action: checkWordParam("ctrl", "manufacturerProductType", 1, 2),
+				action: checkWordParam("ctrldev", "data.manufacturerProductType", 1, 2),
 				answer: yesNo
 			},
 			
-			// ThermostatMode
+			// DD_VersionCCData_Rev01
+			{
+				question: ["Does Firmware 0 Version = 0x#### (####) match the actual device?", "»YES-NO:SHOW«"],
+				action: checkByteParam("ctrl", "data.APIVersionMajor", 1),
+				answer: yesNo
+			},
+			{
+				question: ["Does Firmware 0 Sub-Version = 0x#### (####) match the actual device?", "»YES-NO:SHOW«"],
+				action: checkByteParam("ctrl", "data.APIVersionMinor", 1),
+				answer: yesNo
+			},
+			{
+				question: ["Does Firmware 1 Version = 0x#### (####) match the actual device?", "»YES-NO:SHOW«"],
+				action: checkByteParam("ctrldev", "data.applicationMajor", 1),
+				answer: yesNo
+			},
+			{
+				question: ["Does Firmware 1 Sub-Version = 0x#### (####) match the actual device?", "»YES-NO:SHOW«"],
+				action: checkByteParam("ctrldev", "data.applicationMinor", 1),
+				answer: yesNo
+			},
+			
+			// CDR_ThermostatModeCC_Rev01
 			{
 				question: ["Confirm that last known mode of thermostat is '####' (0x####) in the DUTs UI!", "»YES-NO:SHOW«"],
 				action: checkByteParam("dev", "ThermostatMode.data.mode", 2),
@@ -776,43 +1003,103 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["* THERMOSTAT_MODE_SET to mode = 'HEAT'."],
-				answer: function() { lastDevice().ThermostatMode.Set(1) }
+				action: function() { lastDevice().ThermostatMode.Set(1) }
 				// TODO parse HEAT -> Heat
 			},
 			{
 				question: ["* THERMOSTAT_MODE_SET to mode = 'MANUFACTURER_SPECIFIC' with manufacturer specific data = ####."], // "[1,2,3]" string to array using eval
-				answer: function() { lastDevice().ThermostatMode.SetManufacturerSpecific(eval(getParam(1))) }
+				action: function() { lastDevice().ThermostatMode.SetManufacturerSpecific(eval(getParam(1))) }
 			},
 			
 			// ThermostatSetpoint
 			{
 				question: ["* THERMOSTAT_SETPOINT_SET for Setpoint Type 'Cooling' with value=#### °C"],
-				answer: function() { lastDevice().ThermostatSetPoint.Set(2, decParam(1)) }
+				action: function() { lastDevice().ThermostatSetPoint.Set(2, decParam(1)) }
 				// TODO parse Cooling
 			},
 			{
 				question: ["* THERMOSTAT_SETPOINT_GET for Setpoint Type 'Cooling' subsequently to SETPOINT_SET"],
-				answer: function() { lastDevice().ThermostatSetPoint.Get(2) }
+				action: function() { lastDevice().ThermostatSetPoint.Get(2) }
 				// TODO parse Cooling
 			},
 			{
 				question: [
 					"Please set the Setpoint for type 'FullPower' to #### °C",
-					"-----------------------------------------------------------------------",
 					"Has the Setpoint been set sucessfully?",
 					"»YES-NO:SHOW«"
 				],
-				action:	checkScale("ThermostatSetPoint", "modeName", "Full Power", 1),
+				action:	function() {
+					try {
+						lastDevice().ThermostatSetPoint.Set(15, decParam(1));
+					} catch(e) {
+						return false;
+					}
+					return true;
+				},
 				answer: yesNo
 				// TODO parse FullPower -> Full Power
 			},
 			{
 				question: ["* THERMOSTAT_MODE_SET to mode = 'HEAT'."],
-				answer: function() { lastDevice().ThermostatMode.Set(1) }
+				action: function() { lastDevice().ThermostatMode.Set(1) }
 			},
 			{
 				question: ["* THERMOSTAT_MODE_SET to mode = 'MANUFACTURER_SPECIFIC' with manufacturer specific data = ####."], // "[1,2,3]" string to array using eval
-				answer: function() { lastDevice().ThermostatMode.SetManufacturerSpecific(eval(getParam(1))) }
+				action: function() { lastDevice().ThermostatMode.SetManufacturerSpecific(eval(getParam(1))) }
+			},
+			
+			// S2C_02010_S2NonceGetAndReport_Rev01
+			{
+				question: ["Prepare the DUT to send any S2 encapsulated command to the CTT End Device (Node ID = ####) ..."],
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' and send any S2 encapsulated command from DUT to CTT End Device (Node ID = ####)!"],
+				action: function() {
+					setTimeout(function() {
+						lastDevice().Basic.Get()
+					}, 1000);
+				},
+				answer: ok
+			},
+			
+			// CCR_MultiChannelAssociationCC_Rev02
+			{
+				question: ["* Multichannel Association Set to add End Point #### of node #### to Group Id = #### of node ####."],
+				action: function() { lastDevice().MultiChannelAssociation.Set(decParam(3), decParam(2), decParam(1)) }
+			},
+			{
+				question: ["Try to add End Point #### of node #### to Association group '####' (Group Id = ####) of node ####"],
+				action: function() { lastDevice().MultiChannelAssociation.Set(decParam(4), decParam(2), decParam(1)) }
+			},
+			{
+				question: ["Does the DUT's UI allow to set the Association as described above?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["* Multi Channel Association Remove to remove End Point #### of node #### from Group Id = #### of node ####."],
+				action: function() { lastDevice().MultiChannelAssociation.Set(decParam(3), decParam(2), decParam(1)) }
+			},
+			{
+				question: ["Please wait that the Inclusion has finished, make sure that the DUT has completed the Association and AGI interview and", "proceed by clicking 'OK'"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
+				question: ["Do you want to exclude the DUT? If 'No' is clicked, reset the DUT before the following steps!", "»YES-NO:SHOW«"],
+				action: waitInterviewDone,
+				answer: no
+			},
+			
+			// CDR_NIFRequirements_Rev01
+			{
+				question: ["Click 'OK' when the NIF has been triggered!", "»OK:SHOW«"],
+				action: function() { zway.controller.SendNodeInformation() },
+				answer: ok
+			},
+			{
+				question: ["Is it possible to trigger a Broadcast Node Information Frame from the DUT?", "»YES-NO:SHOW«"],
+				answer: yes
 			},
 		]
 	}
@@ -820,6 +1107,7 @@ function ZWayCTTAutoTestQA(helpers) {
 
 function ZWayCTTAutoTestIgnoreQ() {
 	return iq = [
+		"---------------------",
 		"Done SendDataEx: Data="
 	]
 	

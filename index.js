@@ -104,6 +104,7 @@ ZWayCTTAutoTest.prototype.setup = function () {
 	this.iq = this.iq.map(function(q) {
 		return new RegExp(".*" + escapeRegExp(q).replace(/####/g, "(.*)") + ".*");
 	});
+	this.iq.push(/^[ \t]*$/);
 	 
 	this.buffer = Array(this.bufferLen);
 };
@@ -116,17 +117,17 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 		lines.forEach(function(line) {
 			line = line.replace(/{color(:[^}]+)?}/g, ''); // remove {color:xxx} and {color}
 			
-			self.debug("Received message: " + line);
-			
 			// check ignore list
 			self.iq.forEach(function(q) {
 				if (line.match(q)) {
+					self.debug("Ignored message: " + line);
 					line = "";
-					self.debug("Ignored message");
 				}
 			});
 			
 			if (line.length === 0) return;
+			
+			self.debug("Received message: " + line);
 			
 			// roll the buffer
 			for (var i = self.bufferLen - 1; i > 0; i--) {
@@ -162,12 +163,13 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 					ret = test.action();
 				}
 				
-				var answer = test.answer(ret);
-				
-				if (answer) {
-					self.sendButton(answer);
+				if (test.answer) {
+					var answer = test.answer(ret);
+					
+					if (answer) {
+						self.sendButton(answer);
+					}
 				}
-				
 				return true;
 			});
 		});

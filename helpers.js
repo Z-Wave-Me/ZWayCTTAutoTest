@@ -1,7 +1,19 @@
 // Helpers
 
 function ZWayCTTAutoTestHelperDev(obj) {
-	this.d = (obj == "dev") ? ZWayCTTAutoTestHelpers.lastDevice() : ZWayCTTAutoTestHelpers.controller();
+	switch(obj) {
+		case "dev":
+			this.d = ZWayCTTAutoTestHelpers.lastDevice();
+			break;
+		case "ctrldev":
+			this.d = ZWayCTTAutoTestHelpers.controllerDevice();
+			break;
+		case "ctrl":
+			this.d = ZWayCTTAutoTestHelpers.controller();
+			break;
+		default:
+			ZWayCTTAutoTestHelpers.alert();
+	}
 }
 
 ZWayCTTAutoTestHelperDev.prototype.value = function(path) {
@@ -24,16 +36,18 @@ ZWayCTTAutoTestHelpers.dev = function(obj) {
 ZWayCTTAutoTestHelpers.reset = function(success) {
 	zway.controller.SetDefault();
 	
-	var onDone = function() {
-		if (this.value === 0) {
-			setTimeout(function() { // to make sure post-reset initalization is finished (set self to SIS)
-				success();
-			}, 10000);
-			zway.controller.data.controllerState.unbind(onDone);
-		}
-	};
-	
-	zway.controller.data.controllerState.bind(onDone);
+	if (success) {
+		var onDone = function() {
+			if (this.value === 0) {
+				setTimeout(function() { // to make sure post-reset initalization is finished (set self to SIS)
+					success();
+				}, 10000);
+				zway.controller.data.controllerState.unbind(onDone);
+			}
+		};
+		
+		zway.controller.data.controllerState.bind(onDone);
+	}
 }
 
 ZWayCTTAutoTestHelpers.startInclusion = function() {
@@ -43,7 +57,7 @@ ZWayCTTAutoTestHelpers.startInclusion = function() {
 }
 
 ZWayCTTAutoTestHelpers.resetAndStartInclusion = function() {
-	this.reset(ZWayCTTAutoTestHelpers.startInclusion);
+	ZWayCTTAutoTestHelpers.reset(ZWayCTTAutoTestHelpers.startInclusion);
 }
 
 ZWayCTTAutoTestHelpers.startExclusion = function() {
@@ -80,7 +94,7 @@ ZWayCTTAutoTestHelpers.yesNo = function(ret) {
 
 ZWayCTTAutoTestHelpers.alert = function(msg) {
 	console.log("Test failed!" + (msg ? " " + msg : ""));
-	return no();
+	return ZWayCTTAutoTestHelpers.no();
 }
 
 ZWayCTTAutoTestHelpers.setParams = function(params) {
@@ -100,7 +114,7 @@ ZWayCTTAutoTestHelpers.hex = function(v) {
 }
 
 ZWayCTTAutoTestHelpers.hexWord = function(v1, v2) {
-	return (ZWayCTTAutoTestHelpers.hex(v1) << 16) + ZWayCTTAutoTestHelpers.hex(v2);
+	return (ZWayCTTAutoTestHelpers.hex(v1) << 8) + ZWayCTTAutoTestHelpers.hex(v2);
 }
 
 ZWayCTTAutoTestHelpers.decParam = function(paramNum) {
@@ -121,6 +135,10 @@ ZWayCTTAutoTestHelpers.wordParam = function(paramNumH, paramNumL) {
 
 ZWayCTTAutoTestHelpers.lastDevice = function() {
 	return zway.devices[zway.controller.data.lastIncludedDevice.value];
+}
+
+ZWayCTTAutoTestHelpers.controllerDevice = function() {
+	return zway.devices[zway.controller.data.nodeId.value];
 }
 
 ZWayCTTAutoTestHelpers.controller = function() {
@@ -177,7 +195,6 @@ ZWayCTTAutoTestHelpers.checkScale = function(cc, selector, scale_param, value_pa
 				return (data[i].val.value - value) < DELTA;
 			}
 			else if ((scale === '°C' && data[i][selector].value === '°F') || (scale === '°F' && data[i][selector].value === '°C') || scale === 'unknown scale') {
-				console.logJS("!!!!!!", data[i].intVal.value, Math.pow(10, data[i].precision.value), data[i].intVal.value / (Math.pow(10, data[i].precision.value)), value);
 				return (data[i].intVal.value / (Math.pow(10, data[i].precision.value)) - value) < DELTA;
 			}
 		}
@@ -199,6 +216,11 @@ ZWayCTTAutoTestHelpers.checkAllScalesZero = function(cc) {
 		return true;
 	};
 };
+
+ZWayCTTAutoTestHelpers.forceInterview = function() {
+	ZWayCTTAutoTestHelpers.lastDevice().data.nodeInfoFrame = "";
+	ZWayCTTAutoTestHelpers.lastDevice().RequestNodeInformation();
+}
 
 ZWayCTTAutoTestHelpers.isDevicePresent = function(i) {
 	return function() {
@@ -239,6 +261,16 @@ ZWayCTTAutoTestHelpers.waitInterviewDone = function() {
 	});
 }
 
+ZWayCTTAutoTestHelpers.waitControllerInterviewDone = function() {
+	var T = 120;
+	
+	return ZWayCTTAutoTestHelpers.wait(T, function() {
+		var selfId = zway.controller.data.nodeId.value;
+		var ctrlId = zway.devices[selfId].data.secureControllerId.value;
+		return zway.devices[ctrlId].data.interviewDone.value;
+	});
+}
+
 ZWayCTTAutoTestHelpers.waitManagementIdle = function() {
 	var T = 120;
 
@@ -258,6 +290,10 @@ ZWayCTTAutoTestHelpers.ccCentralSceneKeyAttribute = function(str) {
 		case "Key Presses 3 times": return 4;
 		case "Key Presses 4 times": return 5;
 		case "Key Presses 5 times": return 6;
+		case "Key Pressed 2 times": return 3;
+		case "Key Pressed 3 times": return 4;
+		case "Key Pressed 4 times": return 5;
+		case "Key Pressed 5 times": return 6;
 		default:
 			ZWayCTTAutoTestHelpers.alert();
 			return null;
