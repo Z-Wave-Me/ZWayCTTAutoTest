@@ -137,6 +137,15 @@ ZWayCTTAutoTestHelpers.lastDevice = function() {
 	return zway.devices[zway.controller.data.lastIncludedDevice.value];
 }
 
+ZWayCTTAutoTestHelpers.getDevice = function(id) {
+	return zway.devices[id];
+}
+
+ZWayCTTAutoTestHelpers.getMaxDevice = function() {
+	var id = Object.keys(zway.devices).slice(-1);
+	return zway.devices[id];
+}
+
 ZWayCTTAutoTestHelpers.controllerDevice = function() {
 	return zway.devices[zway.controller.data.nodeId.value];
 }
@@ -228,9 +237,18 @@ ZWayCTTAutoTestHelpers.isDevicePresent = function(i) {
 	};
 }
 
-ZWayCTTAutoTestHelpers.prepareS2 = function() {
-	zway.controller.data.S2AutoInclude.keys = -1; // all keys
-	zway.controller.data.S2AutoInclude.pin = 0; // use known pin
+ZWayCTTAutoTestHelpers.prepareS2 = function(pin, keys) {
+	if (keys === undefined) {
+		keys = -1; // all keys
+	}
+	
+	if (pin && pin !== 34080) {
+		zway.controller.data.S2AutoInclude.keys = keys;
+		zway.controller.data.S2AutoInclude.pin = pin;
+	} else if (zway.controller.data.S2AutoInclude.pin.value == null && pin === undefined) {
+		zway.controller.data.S2AutoInclude.keys = keys;
+		zway.controller.data.S2AutoInclude.pin = 0; // use known pin
+	}
 }
 
 ZWayCTTAutoTestHelpers.wait = function(timeout, checkFunc) {
@@ -253,12 +271,24 @@ ZWayCTTAutoTestHelpers.waitAndExecute = function(timeout, func) {
 	};
 }
 
+ZWayCTTAutoTestHelpers.defer = function(timeout, func) {
+	setTimeout(func, timeout * 1000);
+}
+
 ZWayCTTAutoTestHelpers.waitInterviewDone = function() {
 	var T = 120;
 	
 	return ZWayCTTAutoTestHelpers.wait(T, function() {
 		return ZWayCTTAutoTestHelpers.dev("dev").value("data.interviewDone");
 	});
+}
+
+ZWayCTTAutoTestHelpers.waitInterviewDoneOrIdle = function() {
+	if (!!ZWayCTTAutoTestHelpers.lastDevice()) {
+		return ZWayCTTAutoTestHelpers.waitInterviewDone()
+	} else {
+		return ZWayCTTAutoTestHelpers.waitIdle()
+	}
 }
 
 ZWayCTTAutoTestHelpers.waitControllerInterviewDone = function() {
@@ -276,6 +306,14 @@ ZWayCTTAutoTestHelpers.waitManagementIdle = function() {
 
 	return ZWayCTTAutoTestHelpers.wait(T, function() {
 		return zway.controller.data.controllerState.value == 0;
+	});
+}
+
+ZWayCTTAutoTestHelpers.waitIdle = function() {
+	var T = 120;
+
+	return ZWayCTTAutoTestHelpers.wait(T, function() {
+		return zway.isIdle();
 	});
 }
 

@@ -83,6 +83,10 @@ ZWayCTTAutoTest.prototype.setup = function () {
 	executeFile(this.meta.location + "/" + "helpers.js");
 	executeFile(this.meta.location + "/" + "handlers.js");
 
+	ZWayCTTAutoTestHelpers.send = function(ret) {
+		self.sendButton(ret());
+	};
+
 	this.qa = ZWayCTTAutoTestQA(ZWayCTTAutoTestHelpers);
 	this.iq = ZWayCTTAutoTestIgnoreQ();
 
@@ -106,7 +110,7 @@ ZWayCTTAutoTest.prototype.setup = function () {
 	});
 	this.iq.push(/^[ \t]*$/);
 	 
-	this.buffer = Array(this.bufferLen);
+	this.buffer = Array(this.bufferLen).map(function() { return "" });
 };
 
 ZWayCTTAutoTest.prototype.receive = function (message) {
