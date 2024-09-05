@@ -135,4 +135,4 @@ Sometimes some qusetion is missing during the test. This app will not react on s
 
 After editing reload the module using http://localhost:8083/ZAutomation/api/v1/modules/reinitialize/ZWayCTTAutoTest
 
-Retry handling of last CTT log lines after reload: http://localhost:8083/ZWayCTTAutoTestAPI/Reload
+Retry handling of last CTT log lines after reload: http://localhost:8083/ZWayCTTAutoTestReload

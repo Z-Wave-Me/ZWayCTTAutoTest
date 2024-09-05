@@ -58,9 +58,23 @@ ZWayCTTAutoTest.prototype.init = function (config) {
 	this.webSocket.onerror = function(event) { 
 		self.debug("ERROR: ", event.data);
 	}
+
+	ws.allowExternalAccess("ZWayCTTAutoTestReload", this.controller.auth.ROLE.ADMIN);
+	global["ZWayCTTAutoTestReload"] = function() {
+		var _buf = self.buffer;
+		self.controller.reinitializeModule("ZWayCTTAutoTest", "userModules/");
+		_.find(self.controller.registerInstances, function(i) { return i.meta.moduleName === "ZWayCTTAutoTest"}).receive({log: _buf.reverse().join("\n")});
+		return {
+			status: 200,
+			body: "Reloaded"
+		}
+	}
 };
 
 ZWayCTTAutoTest.prototype.stop = function () {
+	ws.revokeExternalAccess("ZWayCTTAutoTestReload");
+	delete global["ZWayCTTAutoTestReload"];
+	
 	this.webSocketClients.forEach(function(cli) {
 		cli.close();
 	});
