@@ -1,12 +1,6 @@
 function ZWayCTTAutoTestQA(helpers) {
 	with(helpers) {
 		return qa = [
-			// Preparing questions:
-			//  cat CTT-log.txt | tr -d '\r' | sed 's/{[^}]*}//g;s/^[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9] //;s/^             //' | grep -aB 1 -A 1 :SHOW | awk '{if(NR%4==1)printf("%s", "{ question: [\"" $0 "\", "); if(NR%4==2) printf("\"" $0 "\"],"); if(NR%4==3) print(" answer: \"" $0 "\" },")}'| sort -u
-			
-			// After editing reload the module using
-			//  http://localhost:8083/ZAutomation/api/v1/modules/reinitialize/ZWayCTTAutoTest
-			
 			// Generic questions about the device
 			// Fill it according to your DUT!
 			{
