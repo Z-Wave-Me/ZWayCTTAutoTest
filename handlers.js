@@ -222,7 +222,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["Has the DUT removed this node (ID = ####) from its Z-Wave nodes list? (see Requirement Number CL:005A.01.52.01.1)", "»YES-NO:SHOW«"],
-				action: isDevicePresent,
+				action: isDevicePresent(1),
 				answer: yesNo
 			},
 			{
@@ -317,12 +317,12 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["Wait until the DUT is ready!", "»OK:SHOW«"],
-				action: waitInterviewDone,
+				action: waitInterviewDoneOrIdle,
 				answer: ok
 			},
 			{
 				question: ["Wait until the Inclusion process has finished or abort it on DUT side!", "»OK:SHOW«"],
-				action: waitInterviewDone,
+				action: waitInterviewDoneOrIdle,
 				answer: ok
 			},
 			{
@@ -851,7 +851,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["Set a configuration parameter value according to Requirement Number: CL:0070.01.31.02.1"],
-				answer: waitInterviewDone // make sure to fetch all params info before proceeding
+				action: waitInterviewDone // make sure to fetch all params info before proceeding
 			},
 			{
 				question: ["Please set the parameter 'Param ####' with number #### to value #### using the DUT's UI!", "******", "Timeout for Test sequence is 5 min, waiting for following events:", "* CONFIGURATION_SET"],
