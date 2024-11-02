@@ -290,6 +290,11 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: ok
 			},
 			{
+				question: ["Please wait for the interview to be finished and visit the Basic Command Class visualisation for node #### in the DUT's UI!", "»OK:SHOW«"],
+				action: waitInterviewDone,
+				answer: ok
+			},
+			{
 				question: ["Click 'OK' as soon as the Inclusion process has been finished on the DUT side.", "»OK:SHOW«"],
 				action: waitIdle,
 				answer: ok
@@ -379,6 +384,10 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			{
 				question: ["Please reset the DUT, start Add Mode and confirm these steps..."],
+				action: resetAndStartInclusion
+			},
+			{
+				question: ["Please reset the DUT, start Add Mode and confirm these steps!"],
 				action: resetAndStartInclusion
 			},
 			{
@@ -1375,6 +1384,11 @@ function ZWayCTTAutoTestQA(helpers) {
 			},
 			
 			// CDR_ThermostatModeCC_Rev01
+			{
+				question: ["Confirm that last known mode of thermostat is '####' (0x####) in the DUT UI!", "»YES-NO:SHOW«"],
+				action: checkByteParam("dev", "ThermostatMode.data.mode", 2),
+				answer: yesNo
+			},
 			{
 				question: ["Confirm that last known mode of thermostat is '####' (0x####) in the DUTs UI!", "»YES-NO:SHOW«"],
 				action: checkByteParam("dev", "ThermostatMode.data.mode", 2),
