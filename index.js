@@ -17,6 +17,8 @@ function ZWayCTTAutoTest (id, controller) {
 
 	this.bufferLen = 0;
 	this.buffer;
+
+	this.buttons = [ "»OK:SHOW«", "»YES-NO:SHOW«", "»OK-CANCEL:SHOW«", "»SKIP:DISABLE«" ];
 }
 
 inherits(ZWayCTTAutoTest, AutomationModule);
@@ -69,11 +71,22 @@ ZWayCTTAutoTest.prototype.init = function (config) {
 			body: "Reloaded"
 		}
 	}
+	
+	ws.allowExternalAccess("ZWayCTTAutoTestCheck", this.controller.auth.ROLE.ADMIN);
+	global["ZWayCTTAutoTestCheck"] = function() {
+		self.checkQuestions();
+		return {
+			status: 200,
+			body: "Reloaded"
+		}
+	}
 };
 
 ZWayCTTAutoTest.prototype.stop = function () {
 	ws.revokeExternalAccess("ZWayCTTAutoTestReload");
 	delete global["ZWayCTTAutoTestReload"];
+	ws.revokeExternalAccess("ZWayCTTAutoTestCheck");
+	delete global["ZWayCTTAutoTestCheck"];
 	
 	this.webSocketClients.forEach(function(cli) {
 		cli.close();
@@ -114,6 +127,7 @@ ZWayCTTAutoTest.prototype.setup = function () {
 			self.bufferLen = test.question.length;
 		}
 		
+		test.question_orig = test.question;
 		test.question = test.question.map(function(line) {
 			return new RegExp(".*" + escapeRegExp(line).replace(/####/g, "(.*)") + ".*");
 		});
@@ -204,4 +218,55 @@ ZWayCTTAutoTest.prototype.sendButton = function (button) {
 	this.webSocketClients.forEach(function(cli) {
 		cli.send(msg);
 	});
+};
+
+ZWayCTTAutoTest.prototype.checkQuestions = function () {
+	var self = this;
+	
+	var zats_qa = fs.load(this.meta.location + "/" + "2023-10-30 CTT ZATS Test Interaction List.txt");
+
+	var lines = zats_qa.split("\n");
+	lines.forEach(function(line) {
+		if (line.match(/^.*\.cs:/)) return; // skip file names
+		if (line.match(/^\t\* message/)) return;
+		if (line.match(/^\t\* question/)) return;
+		if (line.match(/^\t\* resultQuestion/)) return;
+		if (line.match(/^\t\* userQuestion/)) return;
+		if (line.match(/^\t\* $/)) return;
+		if (line.match(/^\t\* "Open Wiki page in web browser ..."$/)) return;
+		
+		var parts = line.split("\"");
+		if (parts.length < 3) return;
+		
+		parts = parts.slice(1, -1);
+		parts = parts.map(function(l, i) { return i % 2 ? '####' : l; });
+
+		line = parts.join("");
+		
+		// check ignore list
+		self.iq.forEach(function(q) {
+			if (line.match(q)) {
+				//self.debug("Ignored message: " + line);
+				line = "";
+			}
+		});
+		
+		if (line.length === 0) return;
+		
+		//self.debug("Checking message: " + line);
+		
+		// match questions
+		if (!self.qa.some(function(test) {
+			var q = test.question_orig.join("\n");
+			self.buttons.forEach(function(b) {
+				q = q.replace("\n" + b, "");
+			});
+			//console.logJS("q", q);
+			//console.logJS("l", line);
+			return q == line;
+		})) {
+			self.debug("Questions not handled: " + line);
+		};
+	});
+	
 };
