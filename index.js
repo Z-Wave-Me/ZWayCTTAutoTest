@@ -18,7 +18,10 @@ function ZWayCTTAutoTest (id, controller) {
 	this.bufferLen = 0;
 	this.buffer;
 
-	this.buttons = [ "»OK:SHOW«", "»YES-NO:SHOW«", "»OK-CANCEL:SHOW«", "»SKIP:DISABLE«" ];
+	this.buttons = [ "»OK:SHOW«", "»YES-NO:SHOW«", "»OK-CANCEL:SHOW«", "»SKIP:SHOW«", "»SKIP:DISABLE«" ];
+	
+	this.disableDebug = false;
+	this.noAction = false;
 }
 
 inherits(ZWayCTTAutoTest, AutomationModule);
@@ -80,6 +83,15 @@ ZWayCTTAutoTest.prototype.init = function (config) {
 			body: "Reloaded"
 		}
 	}
+	
+	ws.allowExternalAccess("ZWayCTTAutoTestParseCTTLog", this.controller.auth.ROLE.ADMIN);
+	global["ZWayCTTAutoTestParseCTTLog"] = function() {
+		self.parseCTTLog();
+		return {
+			status: 200,
+			body: "Parsed"
+		}
+	}
 };
 
 ZWayCTTAutoTest.prototype.stop = function () {
@@ -87,6 +99,8 @@ ZWayCTTAutoTest.prototype.stop = function () {
 	delete global["ZWayCTTAutoTestReload"];
 	ws.revokeExternalAccess("ZWayCTTAutoTestCheck");
 	delete global["ZWayCTTAutoTestCheck"];
+	ws.revokeExternalAccess("ZWayCTTAutoTestParseCTTLog");
+	delete global["ZWayCTTAutoTestParseCTTLog"];
 	
 	this.webSocketClients.forEach(function(cli) {
 		cli.close();
@@ -101,7 +115,9 @@ ZWayCTTAutoTest.prototype.stop = function () {
 // ----------------------------------------------------------------------------
 
 ZWayCTTAutoTest.prototype.debug = function(msg) {
-	console.log(this.getName() + ": " + msg);
+	if (!this.disableDebug) {
+		console.log(this.getName() + ": " + msg);
+	}
 };
 
 ZWayCTTAutoTest.prototype.setup = function () {
@@ -168,7 +184,7 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 			self.buffer[0] = line;
 			
 			// match questions
-			self.qa.some(function(test) { // some is used to match only the first questions
+			var matched = self.qa.some(function(test) { // some is used to match only the first questions
 				var params = [];
 				for (var i = 0; i < test.question.length; i++) {
 					var m = self.buffer[i].match(test.question[test.question.length - 1 - i]);
@@ -190,6 +206,8 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 				
 				// matched
 				
+				if (self.noAction) return true; // don't take any action (for log parsing)
+				
 				var ret;
 				if (test.action) {
 					ret = test.action();
@@ -204,6 +222,34 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 				}
 				return true;
 			});
+			
+			if (!matched && self.buttons.some(function(button) { return line.match(button); })) {
+				if (line.match("»SKIP:SHOW«") || line.match("»SKIP:DISABLE«")) return; // skip those buttons
+				
+				var answer = "undefined";
+				if (line.match("»OK-CANCEL:SHOW«") || line.match("»OK:SHOW«")) answer = "ok";
+				else if (line.match("»YES-NO:SHOW«")) answer = "yesNo";
+				
+				self.buffer.map(function(l) { return self.buttons.some(function(button) { return l.match(button); }); }).slice(0, -1).reverse()
+				// reverse, remove time, \r and empty lines
+				var clear = false;
+				var buf = self.buffer.slice().map(function(l, i) {
+					if (clear) {
+						return "";
+					}
+					if (i > 0 && self.buttons.some(function(button) { return l.match(button); })) {
+						// found another button, so clear this and all subsequent lines
+						clear = true;
+						return "";
+					}
+					return l.replace(/^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}\w*/, "").replace(/\r$/, "").trim();
+				}).filter(function(l) { // remove empty items
+					return l.length
+				}).reverse(); // reverse to match the question
+				
+				// print the question
+				console.log("\n\t\t\t{\n\t\t\t\tquestion: " + JSON.stringify(buf) + ",\n\t\t\t\taction: undefined,\n\t\t\t\tanswer: " + answer + "\n\t\t\t},");
+			}
 		});
 	}
 };
@@ -269,4 +315,22 @@ ZWayCTTAutoTest.prototype.checkQuestions = function () {
 		};
 	});
 	
+};
+
+ZWayCTTAutoTest.prototype.parseCTTLog = function () {
+	var self = this;
+	
+	console.log("Parsing file CTTLogs.txt");
+	
+	var content = fs.loadText(this.meta.location + "/CTTLogs.txt");
+	
+	this.disableDebug = true;
+	this.noAction = true;
+	console.log("Starting");
+	
+	self.receive({log: content});
+	
+	console.log("Done");
+	this.noAction = false;
+	this.disableDebug = false;
 };
