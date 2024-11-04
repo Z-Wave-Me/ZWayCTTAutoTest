@@ -72,10 +72,43 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: yes
 			},
 			{
-				question: ["PIN Code: ####"],
-				action: function() {
-					prepareS2(decParam(1))
-				}
+				question: ["Product Name:", "####", "Is this correct?", "»YES-NO:SHOW«"],
+				// change #### with the name
+				// don't check the real name right now as it is only in the Cert form and Z-Way does not know it
+				answer: yes
+			},
+			{
+				question: ["Does the DUT's UI allow to set a dimming 'Duration' for 'Setting the Level'?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is the DUT capable to display the last known state of the emulated end node?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Does the DUT's UI allow to set a dimming 'Duration' for 'Start Level Change'?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Does the DUT's UI allow to set a 'Start Level' for 'Start Level Change'?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				// Always say we pass. Check it manually!
+				question: ["Make sure the DUT actually contols the Command Class and does not violate any requirment! In particular consider the", "Command Classes specifications!", "Is #### actually controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Does the DUT control any further Command Classes which are not listed / identified in the Form?", "»YES-NO:SHOW«"],
+				answer: no
+			},
+			{
+				question: ["Before continuing this Test Case it is recommended to already make sure that the DUT actually contols the Command", "Classes and does not violate any requirement! In particular consider the Command Classes specifications!", "Do you want to continue?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Are all of them correctly documented as controlled?", "»YES-NO:SHOW«"],
+				answer: yes
 			},
 			
 			// Controled CCs (automate in future?)
@@ -148,10 +181,56 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: yes
 			},
 
-			
+			// List of controlled CCs
+			{
+				question: ["Is COMMAND_CLASS_ANTITHEFT_V3 controlled?", "»YES-NO:SHOW«"],
+				answer: no
+			},
+			{
+				question: ["Is COMMAND_CLASS_APPLICATION_STATUS controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_ASSOCIATION_GRP_INFO_V3 controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_ASSOCIATION_V3 controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_BARRIER_OPERATOR controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_BASIC_V2 controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_CENTRAL_SCENE_V3 controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_CLOCK controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_CONFIGURATION_V4 controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Is COMMAND_CLASS_CONTROLLER_REPLICATION controlled?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+
 			// Common questions
 			{
 				question: ["Activate the Add mode in the UI of the DUT and click 'OK' to start Inclusion by the DUT!", "»OK:SHOW«"],
+				action: startInclusion,
+				answer: ok
+			},
+			{
+				question: ["Activate the Add Mode in the UI of the DUT. Click 'OK' when the Add Mode is active.", "»OK-CANCEL:SHOW«"],
 				action: startInclusion,
 				answer: ok
 			},
@@ -305,7 +384,42 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: ok
 			},
 			{
+				question: ["Wait until DUT is ready and click 'OK'.", "»OK:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' to start the Command Class response tests or Cancel to skip to the next test cycle!", "Note: Skipping test cycles will fail this Test Case!", "»OK-CANCEL:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' to continue with #### as the highest security class", "or click 'Cancel' to skip to the next lower security class!", "Note: Skipping Inclusions will fail this Test Case!", "»OK-CANCEL:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' to continue with ####", "or click 'Cancel' to skip to the next lower security class!", "Note: Skipping Inclusions will fail this Test Case!", "»OK-CANCEL:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' to continue with #### as the highest security class", "or click 'Cancel' to end the Test Case!", "Note: Skipping Inclusions will fail this Test Case!", "»OK-CANCEL:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
 				question: ["Ready for Inclusion?", "»OK:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
+				question: ["In DUT (SIS) UI accept all security schemes and type the DSK PIN when the input dialog is prompted! Ready for Inclusion?", "»OK:SHOW«"],
+				action: waitIdle,
+				answer: ok
+			},
+			{
+				question: ["Click 'OK' as soon as the Exclusion process has finished on the DUT side!", "»OK:SHOW«"],
 				action: waitIdle,
 				answer: ok
 			},
@@ -333,6 +447,30 @@ function ZWayCTTAutoTestQA(helpers) {
 				question: ["Wait until Inclusion process is done!", "»OK:SHOW«"],
 				action: waitInterviewDone,
 				answer: ok
+			},
+			{
+				question: ["Set the DUT into Add Mode and click 'OK'", "»OK:SHOW«"],
+				action: startInclusion,
+				answer: ok
+			},
+			{
+				question: ["Stop Add Mode on DUT and click 'OK'", "»OK:SHOW«"],
+				action: stopInclusion,
+				answer: ok
+			},
+			{
+				question: ["Has the End Device #### been included sucessfully and is there NO request to start an exclusion of that End Device?", "»YES-NO:SHOW«"],
+				action: isDevicePresent(1),
+				answer: yesNo
+			},
+			{
+				question: ["Has the End Device #### been placed in a special section?", "»YES-NO:SHOW«"],
+				answer: no
+			},
+			{
+				question: ["DUT UI Verification", "Is the CTT End Device removed from DUT's device list?", "»YES-NO:SHOW«"],
+				action: !isDevicePresent(),
+				answer: yesNo
 			},
 			{
 				question: ["Please reset the DUT and confirm or start Exclusion of the DUT!", "Removing node..."],
@@ -429,6 +567,16 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: no
 			},
 			{
+				question: ["Refer to the DUT's documentation and perform a factory reset as stated! Click 'OK' after the factory reset has been", "completed!", "»OK:SHOW«"],
+				action: reset,
+				answer: ok
+			},
+			{
+				question: ["Make sure the DUT has been reset before continuing!", "»OK:SHOW«"],
+				action: reset,
+				answer: ok
+			},
+			{
 				question: ["Please click 'OK' and trigger a capability discovery for node #### using the DUT's UI!", "»OK:SHOW«"],
 				action: forceInterview,
 				answer: ok
@@ -450,50 +598,54 @@ function ZWayCTTAutoTestQA(helpers) {
 				action: waitIdle,
 				answer: ok
 			},
-
-			// List of controlled CCs
 			{
-				question: ["Is COMMAND_CLASS_ANTITHEFT_V3 controlled?", "»YES-NO:SHOW«"],
-				answer: no
-			},
-			{
-				question: ["Is COMMAND_CLASS_APPLICATION_STATUS controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_ASSOCIATION_GRP_INFO_V3 controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_ASSOCIATION_V3 controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_BARRIER_OPERATOR controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_BASIC_V2 controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_CENTRAL_SCENE_V3 controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_CLOCK controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_CONFIGURATION_V4 controlled?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Is COMMAND_CLASS_CONTROLLER_REPLICATION controlled?", "»YES-NO:SHOW«"],
-				answer: yes
+				question: ["PIN Code: ####"],
+				action: function() {
+					prepareS2(decParam(1))
+				}
 			},
 
-			
+			// DSK requirements
+			{
+				question: ["When a SmartStart including controller has received the DSK of a node for inclusion, it shall keep NWI Mode enabled for", "at least 'nwkMinNWIModeSmartStartDuration' minutes if the node does not get included.", "nwkMinNWIModeSmartStartDuration = 60 (minutes): Minimum duration in which NWI mode shall stay enabled after a", "controller node has received a SmartStart DSK to include.", "Requirement numbers: NWK:01B7.1, NWK:0177.1", "This test takes at least 65 minutes.", "Click 'OK' to continue or 'Cancel' to skip the test!", "»OK-CANCEL:SHOW«"],
+				answer: cancel
+			},
+			{
+				question: ["Please add #### DSK to the DUT's Node Provisioning List:", "####", "»OK:SHOW«"],
+				action: function() {
+					zway.controller.data.smartStart.dskProvisioningList = zway.controller.data.smartStart.dskProvisioningList.value.concat([getParam(2)]);
+				},
+				answer: ok
+			},
+			{
+				question: ["Please add #### DSK to the DUT's Node Provisioning List and click 'OK'!", "####", "»OK:SHOW«"],
+				action: function() {
+					zway.controller.data.smartStart.dskProvisioningList = zway.controller.data.smartStart.dskProvisioningList.value.concat([getParam(2)]);
+				},
+				answer: ok
+			},
+			{
+				question: ["Please remove both entries from the Node Provisioning List and click 'OK'.", "»OK:SHOW«"],
+				action: function() {
+					zway.controller.data.smartStart.dskProvisioningList = [];
+				},
+				answer: ok
+			},
+			{
+				question: ["Please remove the DSK of the CTT End Device from the DUT's Node Provisioning List and click 'OK'.", "»OK:SHOW«"],
+				action: function() {
+					zway.controller.data.smartStart.dskProvisioningList = [];
+				},
+				answer: ok
+			},
+			{
+				question: ["Please remove the Switch On/Off from the Node Provisioning List and click 'OK'.", "»OK:SHOW«"],
+				action: function() {
+					zway.controller.data.smartStart.dskProvisioningList = [];
+				},
+				answer: ok
+			},
+
 			// CCR_BarrierOperatorCC_Rev01
 			{
 				question: ["BARRIER_OPERATOR_SET with target value='0x####' (initiate ####)"],
@@ -506,6 +658,14 @@ function ZWayCTTAutoTestQA(helpers) {
 			{
 				question: ["BARRIER_OPERATOR_SIGNAL_SET with target value='0x####' (####) for Subsytem 'VisualNotification'"],
 				action: function() { lastDevice().BarrierOperator.SignalSet(2, byteParam(1)) }
+			},
+			{
+				question: ["Optional: Is the DUT capable to activate and deactivate the 'Audible Notification' subsystem of supporting end nodes?", "»YES-NO:SHOW«"],
+				answer: yes
+			},
+			{
+				question: ["Optional: Is the DUT capable to activate and deactivate the 'Visual Notification' subsystem of supporting end nodes?", "»YES-NO:SHOW«"],
+				answer: yes
 			},
 			
 			// CCR_DoorLockCC_Rev01 & Rev02
@@ -679,14 +839,6 @@ function ZWayCTTAutoTestQA(helpers) {
 				action: function() { lastDevice().SwitchMultilevel.Set(byteParam(2)) }
 			},
 			{
-				question: ["Does the DUT's UI allow to set a dimming 'Duration' for 'Start Level Change'?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
-				question: ["Does the DUT's UI allow to set a 'Start Level' for 'Start Level Change'?", "»YES-NO:SHOW«"],
-				answer: yes
-			},
-			{
 				question: [
 					"Testing optional level change:",
 					"* Direction   = ####",
@@ -758,11 +910,28 @@ function ZWayCTTAutoTestQA(helpers) {
 					lastDevice().SwitchMultilevel.StartLevelChange(getParam(1) == "up" ? 0 : 1)
 					wait(1)
 					lastDevice().SwitchMultilevel.StopLevelChange()
-				}
+				},
+				answer: ok
 			},
 			{
-				question: ["Is the DUT capable to display the last known state of the emulated end node?", "»YES-NO:SHOW«"],
-				answer: yes
+				question: [
+					"Testing optional level change:",
+					"* Direction   = ####",
+					"* Start Level = ignore",
+					"* Duration    = #### seconds",
+					"1.  Click 'OK' to start test sequence!",
+					"2.  Start level change #### (with #### brightness) and wait a little moment.",
+					"3.  Stop level change.",
+					"»OK:SHOW«"
+				],
+				action: function() {
+					send(ok)
+					wait(1)
+					lastDevice().SwitchMultilevel.StartLevelChange(getParam(1) == "up" ? 0 : 1, decParam(2))
+					wait(1)
+					lastDevice().SwitchMultilevel.StopLevelChange()
+				},
+				answer: ok
 			},
 			{
 				question: ["Please make sure that the current state of the emulated Multilevel Switch device is visible on the DUT's UI and confirm", "to start the test sequence!", "»OK:SHOW«"],
@@ -902,6 +1071,18 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: yesNo
 			},
 			{
+				question: ["Please try to set the parameter 'Param ####' with number #### to value #### (size is ####) using the DUT's UI! Is it possible to", "set the parameter value?", "»YES-NO:SHOW«"],
+				action: function() {
+					try {
+						lastDevice().Configuration.Set(decParam(2), decParam(3), decParam(4));
+					} catch(e) {
+						return false;
+					}
+					return true;
+				},
+				answer: yesNo
+			},
+			{
 				question: ["Does the DUT allow to reset one particular configuration parameter?", "»YES-NO:SHOW«"],
 				answer: yes
 			},
@@ -969,7 +1150,7 @@ function ZWayCTTAutoTestQA(helpers) {
 
 			// CCR_DeviceResetLocallyCC_Rev01
 			{
-				question: ["Please wait for the inclusion to be finished, navigate to the Z-Wave nodes list in the UI of the DUT and click 'OK' to", "reset the emulated device!"],
+				question: ["Please wait for the inclusion to be finished, navigate to the Z-Wave nodes list in the UI of the DUT and click 'OK' to", "reset the emulated device!", "»OK:SHOW«"],
 				action: waitInterviewDone,
 				answer: ok
 			},
@@ -977,7 +1158,8 @@ function ZWayCTTAutoTestQA(helpers) {
 				question: [
 					"Please wait a moment that the reset is completly processed by the DUT.",
 					"Does the DUT indicate that this node (ID = ####) has been reset and left the Z-Wave network regarding to Requirement",
-					"Number CL:005A.01.51.01.1"
+					"Number CL:005A.01.51.01.1",
+					"»YES-NO:SHOW«"
 				],
 				action: function() {
 					wait(2);
@@ -993,7 +1175,7 @@ function ZWayCTTAutoTestQA(helpers) {
 			// CCR_AssociationCC_Rev01
 			{
 				question: ["* ASSOCIATION_SET to add CTT controller (node ID ####) to the association group #### of the emulated Binary Switch", "device(node ID ####)"],
-				action: function() { zway.devices[decParam(3)].Association.Set(decParam(2), decParam(1)) }
+				action: function() { getDevice(decParam(3)).Association.Set(decParam(2), decParam(1)) }
 			},
 			
 			
@@ -1062,6 +1244,10 @@ function ZWayCTTAutoTestQA(helpers) {
 			{
 				question: ["Please make sure that the current state of the emulated Color Switch device is visible on the DUT's UI and confirm to", "start the test sequence!", "»YES-NO:SHOW«"],
 				answer: yes
+			},
+			{
+				question: ["Please make sure that the current state of the emulated Color Switch device is visible in the DUT's UI and confirm to", "start the test sequence!", "»OK:SHOW«"],
+				answer: ok
 			},
 			
 			// CCR_ImplementedCCVersions_Rev01 & Rev02
@@ -1280,6 +1466,78 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: yesNo
 			},
 			{
+				question: ["Does the DUT display the event '#### (0x####)' for the notification type '#### (0x####)'?", "»YES-NO:SHOW«"],
+				action: function() {
+					wait(2); // TODO due to CTT asking a bit too early
+					
+					var ret = false;
+					var data = lastDevice().Alarm.data;
+					Object.keys(data).forEach(function(type) {
+						if (type === byteParam(4)) {
+							if (data[type][byteParam(2)] && data[type][byteParam(2)].status.value === true) {
+								ret = true;
+							}
+						}
+					});
+					return ret;
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Does the DUT display the event '#### (0x####)' for the notification type", "'#### (0x####)'?", "»YES-NO:SHOW«"],
+				action: function() {
+					wait(2); // TODO due to CTT asking a bit too early
+					
+					var ret = false;
+					var data = lastDevice().Alarm.data;
+					Object.keys(data).forEach(function(type) {
+						if (type === byteParam(4)) {
+							if (data[type][byteParam(2)] && data[type][byteParam(2)].status.value === true) {
+								ret = true;
+							}
+						}
+					});
+					return ret;
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Does the DUT display the event '#### (0x####)' for", "the notification type '#### (0x####)'?", "»YES-NO:SHOW«"],
+				action: function() {
+					wait(2); // TODO due to CTT asking a bit too early
+					
+					var ret = false;
+					var data = lastDevice().Alarm.data;
+					Object.keys(data).forEach(function(type) {
+						if (type === byteParam(4)) {
+							if (data[type][byteParam(2)] && data[type][byteParam(2)].status.value === true) {
+								ret = true;
+							}
+						}
+					});
+					return ret;
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Does the DUT display the event ' (0x####)' for the notification type '#### (0x####)'?", "»YES-NO:SHOW«"],
+				action: function() {
+					wait(2); // TODO due to CTT asking a bit too early
+					
+					var ret = false;
+					var data = lastDevice().Alarm.data;
+					Object.keys(data).forEach(function(type) {
+						if (type === byteParam(3)) {
+							if (data[type][byteParam(1)] && data[type][byteParam(1)].status.value === true) {
+								ret = true;
+							}
+						}
+					});
+					return ret;
+				},
+				answer: yesNo
+			},
+			{
 				question: ["Does the state of notification type '####' return to 'idle'?", "»YES-NO:SHOW«"],
 				action: function() {
 					wait(2); // TODO due to CTT asking a bit too early
@@ -1300,6 +1558,14 @@ function ZWayCTTAutoTestQA(helpers) {
 					return ret;
 				},
 				answer: yesNo
+			},
+			{
+				question: ["A controlling node MUST have a UI allowing the end user to see the received Notification Reports (Notification Type and", "event/state) [CL:0071.01.41.01.1, CL:0071.01.51.05.2]", "The following test sequence verifies if the DUT displays an unsolicited Notification Report correctly. Please make sure", "that the UI for Alarm / Notification Command Class is visible and click 'OK' when ready!", "»OK:SHOW«"],
+				answer: ok
+			},
+			{
+				question: ["Does the DUT UI allow to create rules or commands based on received notifications?", "»YES-NO:SHOW«"],
+				answer: no
 			},
 			
 			// CCR_SimpleAVCC_Rev01
@@ -1443,11 +1709,11 @@ function ZWayCTTAutoTestQA(helpers) {
 			
 			// S2C_02010_S2NonceGetAndReport_Rev01
 			{
-				question: ["Prepare the DUT to send any S2 encapsulated command to the CTT End Device (Node ID = ####) ..."],
+				question: ["Prepare the DUT to send any S2 encapsulated command to the CTT End Device (Node ID = ####) ...", "»OK:SHOW«"],
 				answer: ok
 			},
 			{
-				question: ["Click 'OK' and send any S2 encapsulated command from DUT to CTT End Device (Node ID = ####)!"],
+				question: ["Click 'OK' and send any S2 encapsulated command from DUT to CTT End Device (Node ID = ####)!", "»OK:SHOW«"],
 				action: function() {
 					setTimeout(function() {
 						lastDevice().Basic.Get()
@@ -1685,6 +1951,13 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: yes
 			},
 			{
+				question: ["Please use the DUT's UI to send a Basic Set command to CTT End Device (Node ID = ####) and click 'OK'.", "»OK:SHOW«"],
+				action: function() {
+					getDevice(decParam(1)).Basic.Set(0)
+				},
+				answer: ok
+			},
+			{
 				question: ["Press 'OK' and send a Basic Set command from the DUT to Node ID ####.", "»OK:SHOW«"],
 				action: function() {
 					send(ok)
@@ -1794,7 +2067,6 @@ function ZWayCTTAutoTestQA(helpers) {
 				answer: yesNo
 			},
 			{
-				// TODO non-space character between WARNING and MESSAGE
 				question: ["Is the CTT Controller listed as an S0 device in the DUT UI?", "»YES-NO:SHOW«"],
 				action: function() {
 					return (
@@ -1811,6 +2083,72 @@ function ZWayCTTAutoTestQA(helpers) {
 							)
 						)
 					);
+				},
+				answer: yesNo
+			},
+			{
+				
+				question: ["Is the S2 Node (Node ID = ####) shown in the DUT’s device list", "as added with S2 security?", "»YES-NO:SHOW«"],
+				action: function() {
+					return (
+						getDevice(decParam(1)) &&
+						getDevice(decParam(1)).SecurityS2.data.securityAbandoned.value == false &&
+						(
+							getDevice(decParam(1)).SecurityS2.data.grantedKeys.S2Unauthenticated.value == true ||
+							getDevice(decParam(1)).SecurityS2.data.grantedKeys.S2Authenticated.value == true ||
+							getDevice(decParam(1)).SecurityS2.data.grantedKeys.S2Access.value == true
+						)
+					);
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Is the S0 Node (Node ID = ####) shown in the DUT’s device list", "as added with S0 security?", "»YES-NO:SHOW«"],
+				action: function() {
+					return (
+						getDevice(decParam(1)) &&
+						getDevice(decParam(1)).Security.data.securityAbandoned.value == false
+					);
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Is the S0 Node (Node ID = ####) shown in the DUT’s device list", "as non-securely added?", "»YES-NO:SHOW«"],
+				action: function() {
+					return (
+						getDevice(decParam(1)) &&
+						(
+							!getDevice(decParam(1)).Security ||
+							getDevice(decParam(1)).Security.data.securityAbandoned.value == true
+						)
+					);
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Is the S2 Node (Node ID = ####) shown in the DUT’s device list", "as non-securely added?", "»YES-NO:SHOW«"],
+				action: function() {
+					return (
+						getDevice(decParam(1)) &&
+						(
+							!getDevice(decParam(1)).SecurityS2 ||
+							getDevice(decParam(1)).SecurityS2.data.securityAbandoned.value == true
+						)
+					);
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Has the S0 Node (Node ID = ####) been removed from DUT’s device list?", "»YES-NO:SHOW«"],
+				action: function() {
+                                        return !getDevice(decParam(1));
+				},
+				answer: yesNo
+			},
+			{
+				question: ["Has the S2 Node (Node ID = ####) been removed from DUT’s device list?", "»YES-NO:SHOW«"],
+				action: function() {
+                                        return !getDevice(decParam(1));
 				},
 				answer: yesNo
 			},

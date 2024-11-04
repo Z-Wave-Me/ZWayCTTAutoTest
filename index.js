@@ -184,7 +184,7 @@ ZWayCTTAutoTest.prototype.receive = function (message) {
 				
 				params.unshift("zeroth param"); // params are numbered from 1
 				
-				console.logJS("Matched with params", params);
+				console.debug("Matched with params " + JSON.stringify(params));
 				
 				ZWayCTTAutoTestHelpers.setParams(params);
 				

@@ -56,6 +56,10 @@ ZWayCTTAutoTestHelpers.startInclusion = function() {
 	zway.controller.AddNodeToNetwork(true);
 }
 
+ZWayCTTAutoTestHelpers.stopInclusion = function() {
+	zway.controller.AddNodeToNetwork(false);
+}
+
 ZWayCTTAutoTestHelpers.resetAndStartInclusion = function() {
 	ZWayCTTAutoTestHelpers.reset(ZWayCTTAutoTestHelpers.startInclusion);
 }
@@ -233,7 +237,8 @@ ZWayCTTAutoTestHelpers.forceInterview = function() {
 
 ZWayCTTAutoTestHelpers.isDevicePresent = function(i) {
 	return function() {
-		return !(ZWayCTTAutoTestHelpers.getParam(i) in zway.devices);
+		if (i === undefined) return !!ZWayCTTAutoTestHelpers.lastDevice();
+		else return !(ZWayCTTAutoTestHelpers.getParam(i) in zway.devices);
 	};
 }
 
